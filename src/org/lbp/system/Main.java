@@ -4,17 +4,42 @@
  */
 package org.lbp.system;
 
-/**
- *
- * @author informatica
- */
-public class Main {
+import javafx.application.Application;
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+import javafx.scene.Scene;
+
+import javafx.scene.control.Label;
+
+import javafx.scene.layout.StackPane;
+
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+
+    public void start(Stage primaryStage) {
+
+        Label label = new Label("¡Hola, JavaFX!");
+
+        StackPane root = new StackPane(label);
+
+        Scene scene = new Scene(root, 300, 200);
+
+        primaryStage.setTitle("Mi Primera App JavaFX");
+
+        primaryStage.setScene(scene);
+
+        primaryStage.show();
+
     }
-    
+
+    // El método main clásico
+    public static void main(String[] args) {
+
+        // Esta línea arranca la aplicación JavaFX
+        launch(args);
+
+    }
+
 }
