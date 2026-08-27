@@ -3,21 +3,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package org.paginalibre8.system;
-
+ 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+ 
 public class Main extends Application {
     private static Stage escenarioPrincipal;
     @Override
     public void start(Stage escenarioPrincipal) throws Exception {
         Main.escenarioPrincipal = escenarioPrincipal;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/InicioSesionView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/MenuDashboardView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        escenarioPrincipal.setTitle("Libreria Entre Paginas");
+        escenarioPrincipal.setTitle(" Libreria Entre Paginas");
         escenarioPrincipal.setScene(scene);
         escenarioPrincipal.show();
     }
