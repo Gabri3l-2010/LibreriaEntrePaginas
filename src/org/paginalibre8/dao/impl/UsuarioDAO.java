@@ -46,8 +46,18 @@ public class UsuarioDAO {
     
     //registrarUsuario
     public boolean registrarUsuario(String username, String passwordHash){
+        String sql = "{call sp_registrar_usuario(?,?,'Empleado')}";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+                CallableStatement consulta = conexion.prepareCall(sql)){
+            consulta.setString(1, username);
+            consulta.setString(2, passwordHash);
+            int filasAfectadas = consulta.executeUpdate();
+            return filasAfectadas > 0;//simplificación del if _ true
+        } catch (SQLException e) {
+            System.err.println("Error en Registrar Usuario: " + e.getMessage());
+            return false;
+        }
         
-        return false;
     }
-       }
     
+}
