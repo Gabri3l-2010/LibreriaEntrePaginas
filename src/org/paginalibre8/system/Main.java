@@ -4,6 +4,7 @@
  */
 package org.paginalibre8.system;
  
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,32 +12,26 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
  
 public class Main extends Application {
+ 
     private static Stage escenarioPrincipal;
+ 
+    public static void cambiarEscena(String rutaFXML) throws IOException {
+        //Parent raiz = FXMLLoader.load(getClass().getResource(rutaFXML));
+        Parent raiz = FXMLLoader.load(Main.class.getResource(rutaFXML));                
+        Scene escena = new Scene(raiz); 
+        escenarioPrincipal.setScene(escena);
+        escenarioPrincipal.sizeToScene();
+        escenarioPrincipal.centerOnScreen();
+        escenarioPrincipal.show();        
+    }
+ 
     @Override
     public void start(Stage escenarioPrincipal) throws Exception {
-        Main.escenarioPrincipal = escenarioPrincipal;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/MenuDashboardView.fxml"));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        escenarioPrincipal.setTitle(" Libreria Entre Paginas");
-        escenarioPrincipal.setScene(scene);
-        escenarioPrincipal.show();
+        //convertir .fxml en nodo raiz
+        Main.escenarioPrincipal = escenarioPrincipal;     
+        cambiarEscena("/org/paginalibre8/view/style/InisioSesionView.fxml");
     }
-     public static void cambiarVista(String fxmlPath) throws Exception {
-        java.net.URL url = Main.class.getResource(fxmlPath);
-        if (url == null) {
-            throw new Exception("No se encontró el archivo FXML en la ruta: " + fxmlPath);
-        }
-        FXMLLoader loader = new FXMLLoader(url);
-        Parent root = loader.load();
-        if (escenarioPrincipal == null) {
-            throw new Exception("El escenarioPrincipal no ha sido inicializado.");
-        }
-        escenarioPrincipal.setScene(new Scene(root));
-    }
-    public static Stage getEscenarioPrincipal() {
-        return escenarioPrincipal;
-    }
+ 
     public static void main(String[] args) {
         launch(args);
     }

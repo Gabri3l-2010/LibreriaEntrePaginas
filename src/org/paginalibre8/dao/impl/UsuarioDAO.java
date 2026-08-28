@@ -45,7 +45,7 @@ public class UsuarioDAO {
     }
     
     //registrarUsuario
-    public boolean registrarUsuario(String username, String passwordHash, String rol){
+    public boolean registrarUsuario(String username, String passwordHash){
         
         return false;
     }

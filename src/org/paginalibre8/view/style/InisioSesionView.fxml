@@ -12,9 +12,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
  
-<AnchorPane id="AnchorPane" prefHeight="426.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.ar.controller.InisioSesionController">
+<AnchorPane id="AnchorPane" prefHeight="426.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre8.controller.InisioSesionController">
     <stylesheets>
-        <URL value="@/org/ar/view/style/inisiosesionview.css" />
+        <URL value="@/org/paginalibre8/view/style/inisiosesionview.css" />
     </stylesheets>
     <children>
         <StackPane layoutX="100.0" layoutY="100.0" prefHeight="200.0" prefWidth="400.0">
