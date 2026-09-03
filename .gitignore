@@ -1,1 +1,15 @@
+<<<<<<< HEAD
 /dist/
+=======
+
+**/nbproject/private/
+**/nbproject/Makefile-.mk
+**/nbproject/Package-.bash
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+.atl/
+db.properties
+>>>>>>> 4c0bc92585a4342aa88fad463609476d81c16efa

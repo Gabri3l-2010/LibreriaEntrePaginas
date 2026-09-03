@@ -55,7 +55,7 @@ public class InicioSesionController implements Initializable {
     @FXML
     public void eventoIrRegistro(ActionEvent evento) {
         try {
-            Main.cambiarVista("/org/paginalibre8/view/style/RegistrarUsuarioView.fxml");
+            Main.cambiarEscena("/org/paginalibre8/view/style/RegistrarUsuarioView.fxml");
         } catch (Exception e) {
             System.err.println("Error al cargar el registro: " + e.getMessage());
             lblMensaje.setText("Error interno");

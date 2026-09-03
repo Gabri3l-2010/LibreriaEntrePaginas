@@ -1,8 +1,10 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package org.paginalibre8.controller;
+
 
 import java.io.IOException;
 import javafx.fxml.FXML;
@@ -16,6 +18,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+
+
 import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.system.Main;
 import org.paginalibre8.util.SecurityUtil;
@@ -40,6 +44,8 @@ public class RegistrarUsuarioController implements Initializable {
  
     //eventoRegistrar
     @FXML
+
+
     public void eventoRegistrar(ActionEvent evento) throws Exception{
         try {
             ValidacionException.validarNoVacio(txtUsusario.getText(), "usuario");
@@ -56,7 +62,9 @@ public class RegistrarUsuarioController implements Initializable {
             boolean registrado = usuarioDAO.registrarUsuario(usuario, passwordHass);
             if (registrado) {
                 mostrarAlerta(Alert.AlertType.INFORMATION, "Usuario registrado con exito");
-                Main.cambiarVista("/org/paginalibre8/view/style/InicioSesionView.fxml");         
+
+                Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");                
+
             }else{
                 mostrarAlerta(Alert.AlertType.ERROR, "Error al Registrar. El usuario podría ya existir.");
             }
@@ -69,9 +77,11 @@ public class RegistrarUsuarioController implements Initializable {
     }
     //eventoRegresar
     @FXML
+
     public void eventoRegresar(ActionEvent evento) throws Exception{
          try {
-            Main.cambiarVista("/org/paginalibre8/view/style/InicioSesionView.fxml");
+            Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");
+
         } catch (IOException e) {
             System.err.println("Error al carger registro:  " +  e.getMessage());
             lblMensaje.setText("Error interno");

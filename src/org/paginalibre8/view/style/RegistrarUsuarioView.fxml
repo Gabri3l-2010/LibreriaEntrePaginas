@@ -53,4 +53,8 @@
         </Label>
         <Label fx:id="lblMensaje" layoutX="239.0" layoutY="323.0" text="mensaje" />
     </children>
+<<<<<<< HEAD
 </AnchorPane>
+=======
+</AnchorPane>
+>>>>>>> 4c0bc92585a4342aa88fad463609476d81c16efa

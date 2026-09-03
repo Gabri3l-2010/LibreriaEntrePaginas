@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package org.paginalibre8.system;
-
+ 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,11 +17,11 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/InicioSesionView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        escenarioPrincipal.setTitle("Libreria Entre Paginas");
+        escenarioPrincipal.setTitle("Deco Librería");
         escenarioPrincipal.setScene(scene);
         escenarioPrincipal.show();
     }
-     public static void cambiarVista(String fxmlPath) throws Exception {
+     public static void cambiarEscena(String fxmlPath) throws Exception {
         java.net.URL url = Main.class.getResource(fxmlPath);
         if (url == null) {
             throw new Exception("No se encontró el archivo FXML en la ruta: " + fxmlPath);
