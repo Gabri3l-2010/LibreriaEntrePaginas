@@ -37,9 +37,9 @@
                         <Label text="Usuario" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Contraseña" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="Confirmar Contraseña" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <TextField fx:id="txtUsusario" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <PasswordField fx:id="txtPassword" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <PasswordField fx:id="txtConfirmarPassword" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtUsuario" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <PasswordField fx:id="txtPassword" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <PasswordField fx:id="txtConfirmarPassword" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                     </children>
                 </GridPane>
             </children>
@@ -53,8 +53,4 @@
         </Label>
         <Label fx:id="lblMensaje" layoutX="239.0" layoutY="323.0" text="mensaje" />
     </children>
-<<<<<<< HEAD
 </AnchorPane>
-=======
-</AnchorPane>
->>>>>>> 4c0bc92585a4342aa88fad463609476d81c16efa

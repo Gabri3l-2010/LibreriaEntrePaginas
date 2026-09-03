@@ -17,7 +17,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/InicioSesionView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        escenarioPrincipal.setTitle("Deco Librería");
+        escenarioPrincipal.setTitle("Librería entre Paginas");
         escenarioPrincipal.setScene(scene);
         escenarioPrincipal.show();
     }
