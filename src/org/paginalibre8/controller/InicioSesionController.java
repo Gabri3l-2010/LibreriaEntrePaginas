@@ -14,7 +14,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import org.paginalibre8.dao.impl.UsuarioDao;
+import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.system.Main;
 import org.paginalibre8.util.SecurityUtil;
@@ -26,11 +26,11 @@ public class InicioSesionController implements Initializable {
     @FXML private Button btnIniciarSesion;
     @FXML private Button btnRegistrarse;
     @FXML private Label lblMensaje;
-    @FXML private UsuarioDao usuarioDAO;
+    @FXML private UsuarioDAO usuarioDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        usuarioDAO = new UsuarioDao();
+        usuarioDAO = new UsuarioDAO();
         lblMensaje.setText("");
     }
 
@@ -42,7 +42,7 @@ public class InicioSesionController implements Initializable {
             lblMensaje.setText("Por favor, complete todos sus datos.");
             return;
         }
-        String passwordHash = SecurityUtil.hashSHA256Password(password);
+        String passwordHash = SecurityUtil.hashSHA256(password);
         Usuario usuarioIniciado = usuarioDAO.iniciarSesion(usuario,passwordHash);
         if (usuarioIniciado != null) {
             lblMensaje.setText("Inicio correcto");
@@ -55,7 +55,7 @@ public class InicioSesionController implements Initializable {
     @FXML
     public void eventoIrRegistro(ActionEvent evento) {
         try {
-            Main.cambiarVista("/org/Deco/view/RegistrarUsuarioView.fxml");
+            Main.cambiarVista("/org/paginalibre8/view/style/RegistrarUsuarioView.fxml");
         } catch (Exception e) {
             System.err.println("Error al cargar el registro: " + e.getMessage());
             lblMensaje.setText("Error interno");
@@ -67,7 +67,7 @@ public class InicioSesionController implements Initializable {
         String tituloDashboard = "";
         switch (usuario.getRol().toLowerCase()) {
             case "admin":
-                rutaFXML = "/org/Deco/view/MenuPrincipalDashboardView.fxml";
+                rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
                 tituloDashboard = "Panel de Administracion";
                 break;
             /*case "empleado":

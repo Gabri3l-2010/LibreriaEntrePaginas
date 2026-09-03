@@ -1,14 +1,17 @@
 package org.paginalibre8.util;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+//hasear nustra clave as SHA256
 public class SecurityUtil {
-    public static String hashSHA256Password(String password) {
+    
+    public static String hashSHA256(String password){
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder(2 * encodedHash.length);
-            for (byte b : encodedHash) {
+            byte[] encodedhash = digest.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            
+            StringBuilder hexString = new StringBuilder(2 * encodedhash.length);
+            for (byte b : encodedhash) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
                     hexString.append('0');
@@ -20,4 +23,5 @@ public class SecurityUtil {
             throw new RuntimeException("Error al encriptar la contraseña", e);
         }
     }
+    
 }
