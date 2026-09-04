@@ -1,164 +1,110 @@
 package org.paginalibre8.controller;
 
-
-
-import java.io.IOException;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.model.Usuario;
 
-public class UsuariosController {
-    @FXML private TableView<Usuario> tablaUsuarios;
-    @FXML private TableColumn<Usuario, Integer> colId;
-    @FXML private TableColumn<Usuario, String> colUsuario;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class UsuariosController implements Initializable {
+
+    @FXML private TextField txtId;
+    @FXML private TextField txtNombre;
+    @FXML private TextField txtApellido;
+    @FXML private TextField txtUsername;
+    @FXML private TextField txtCorreo;
+    @FXML private TextField txtRol;
+    @FXML private TextField txtRol1;
+    @FXML private ComboBox<String> cmbEstado;
+
+    @FXML private TableView<Usuario> tblUsuarios;
+    @FXML private TableColumn<Usuario, Number> colId;
     @FXML private TableColumn<Usuario, String> colNombre;
     @FXML private TableColumn<Usuario, String> colApellido;
-    @FXML private TableColumn<Usuario, String> colRol;
+    @FXML private TableColumn<Usuario, String> colUsuario;
     @FXML private TableColumn<Usuario, String> colCorreo;
-    @FXML private TableColumn<Usuario, Boolean> colActivo;
+    @FXML private TableColumn<Usuario, String> colRol1;
+    @FXML private TableColumn<Usuario, String> colEstado;
     @FXML private TableColumn<Usuario, Void> colAccion;
-    @FXML private Label lblMensaje;
 
-    private final UsuarioDAO usuarioDao = new UsuarioDAO();
-    private final ObservableList<Usuario> datos = FXCollections.observableArrayList();
+    // 1. Instanciamos TU DAO original
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
 
-    @FXML
-    private void initialize() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colUsuario.setCellValueFactory(new PropertyValueFactory<>("username"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colApellido.setCellValueFactory(new PropertyValueFactory<>("apellido"));
-        colRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
-        colActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
-        configurarEstado();
-        configurarAccion();
-        cargarUsuarios();
-    }
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        cmbEstado.getItems().addAll("Activo", "Inactivo");
 
-    private void configurarEstado() {
-        colActivo.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(Boolean activo, boolean empty) {
-                super.updateItem(activo, empty);
-                setText(empty || activo == null ? null : activo ? "Activo" : "Inactivo");
-                getStyleClass().removeAll("estado-activo", "estado-inactivo");
-                if (!empty && activo != null) getStyleClass().add(activo ? "estado-activo" : "estado-inactivo");
+        // 2. Configuramos las columnas para que lean directamente los Getters de tu clase Usuario
+        colId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()));
+        colUsuario.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUsername()));
+        colNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
+        colApellido.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getApellido()));
+        colRol1.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRol()));
+        colCorreo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCorreo()));
+        
+        colEstado.setCellValueFactory(cellData -> {
+            boolean activo = cellData.getValue().isActivo();
+            return new SimpleStringProperty(activo ? "Activo" : "Inactivo");
+        });
+
+        // 3. Cargamos los datos de MySQL a la tabla
+        cargarDatosDesdeBD();
+
+        // 4. Evento para pasar los datos de la fila seleccionada al formulario
+        tblUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                txtId.setText(String.valueOf(newSelection.getId()));
+                txtNombre.setText(newSelection.getNombre());
+                txtApellido.setText(newSelection.getApellido());
+                txtUsername.setText(newSelection.getUsername()); 
+                txtCorreo.setText(newSelection.getCorreo());
+                cmbEstado.setValue(newSelection.isActivo() ? "Activo" : "Inactivo");
             }
         });
     }
 
-    private void configurarAccion() {
-        colAccion.setCellFactory(col -> new TableCell<>() {
-            private final Button btnEditar = new Button("Editar");
-            private final Button btnDesactivar = new Button("Desactivar");
-            private final javafx.scene.layout.HBox panelAcciones = new javafx.scene.layout.HBox(6, btnEditar, btnDesactivar);
-
-            {
-                btnEditar.getStyleClass().add("btn-secundario");
-                btnDesactivar.getStyleClass().add("btn-desactivar");
-                btnEditar.setOnAction(e -> abrirEdicion(getTableView().getItems().get(getIndex())));
-                btnDesactivar.setOnAction(e -> desactivar(getTableView().getItems().get(getIndex())));
-            }
-
-            @Override protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    Usuario u = getTableView().getItems().get(getIndex());
-                    btnDesactivar.setVisible(u != null && u.isActivo());
-                    setGraphic(panelAcciones);
-                }
-            }
-        });
-    }
-
-    private void abrirEdicion(Usuario usuario) {
-        if (usuario == null) return;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/UsuarioAlta.fxml"));
-            Parent root = loader.load();
-            UsuarioAltaController controller = loader.getController();
-            controller.setUsuarioParaEditar(usuario);
-
-            Stage stage = new Stage();
-            stage.setTitle("Editar Usuario - " + usuario.getUsername());
-            stage.setScene(new Scene(root, 520, 610));
-            stage.setResizable(false);
-            stage.setOnHidden(e -> cargarUsuarios());
-            stage.show();
-        } catch (IOException e) {
-            mostrarError("No se pudo abrir la edición de usuario: " + e.getMessage());
-        }
-    }
-
-
-    @FXML
-    private void onNuevoUsuario(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/UsuarioAlta.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Alta de usuario - Librería La Esperanza");
-            stage.setScene(new Scene(root, 520, 610));
-            stage.setResizable(false);
-            stage.setOnHidden(e -> cargarUsuarios());
-            stage.show();
-        } catch (IOException e) {
-            mostrarError("No se pudo abrir el formulario de alta: " + e.getMessage());
-        }
+    private void cargarDatosDesdeBD() {
+        listaUsuarios.clear();
+        // Llamamos al método de TU DAO
+        List<Usuario> usuariosBD = usuarioDAO.listarUsuarios(); 
+        listaUsuarios.addAll(usuariosBD);
+        tblUsuarios.setItems(listaUsuarios);
     }
 
     @FXML
-    private void onActualizar(ActionEvent event) { cargarUsuarios(); }
-
-    private void cargarUsuarios() {
-        datos.setAll(usuarioDao.listarUsuarios());
-        tablaUsuarios.setItems(datos);
-        lblMensaje.setText("Usuarios encontrados: " + datos.size());
+    private void guardarUsuario() {
+        // Aquí irá tu lógica de guardar
     }
 
-    private void desactivar(Usuario usuario) {
-        if (usuario == null || !usuario.isActivo()) return;
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION,
-                "¿Deseas desactivar al usuario " + usuario.getUsername() + "?",
-                ButtonType.YES, ButtonType.NO);
-        confirmacion.setTitle("Desactivar usuario");
-        confirmacion.setHeaderText(null);
-        confirmacion.showAndWait().ifPresent(respuesta -> {
-            if (respuesta == ButtonType.YES) {
-                if (usuarioDao.desactivarUsuario(usuario.getId())) {
-                    mostrarInfo("Usuario desactivado correctamente.");
-                    cargarUsuarios();
-                } else {
-                    mostrarError("No se pudo desactivar el usuario.");
-                }
-            }
-        });
+    @FXML
+    private void modificarUsuario() {
+        // Aquí irá tu lógica de actualizar
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("Gestión de usuarios"); a.setHeaderText(null); a.setContentText(mensaje); a.showAndWait();
+    @FXML
+    private void eliminarUsuario() {
+        // Aquí irá tu lógica de desactivar/eliminar
     }
 
-    private void mostrarError(String mensaje) {
-        Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle("Error"); a.setHeaderText(null); a.setContentText(mensaje); a.showAndWait();
+    @FXML
+    private void limpiarCampos() {
+        txtId.clear();
+        txtNombre.clear();
+        txtApellido.clear();
+        txtUsername.clear();
+        txtCorreo.clear();
+        txtRol.clear();
+        txtRol1.clear();
+        cmbEstado.setValue(null);
+        tblUsuarios.getSelectionModel().clearSelection();
     }
 }
