@@ -9,20 +9,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
- 
 public class Main extends Application {
     private static Stage escenarioPrincipal;
     @Override
     public void start(Stage escenarioPrincipal) throws Exception {
         Main.escenarioPrincipal = escenarioPrincipal;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/MenuDashboardView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/InicioSesionView.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
-        escenarioPrincipal.setTitle(" Libreria Entre Paginas");
+        escenarioPrincipal.setTitle("Librería entre Paginas");
         escenarioPrincipal.setScene(scene);
         escenarioPrincipal.show();
     }
-     public static void cambiarVista(String fxmlPath) throws Exception {
+     public static void cambiarEscena(String fxmlPath) throws Exception {
         java.net.URL url = Main.class.getResource(fxmlPath);
         if (url == null) {
             throw new Exception("No se encontró el archivo FXML en la ruta: " + fxmlPath);

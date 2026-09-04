@@ -5,7 +5,9 @@ import org.paginalibre8.model.Usuario;
 public final class SesionUsuario {
 
     private static SesionUsuario instancia;
+
     private Usuario usuarioActual;
+    private Rol rolActual;
 
     private SesionUsuario() {
     }
@@ -18,11 +20,16 @@ public final class SesionUsuario {
     }
 
     public void iniciarSesion(Usuario usuario) {
+        if (usuario == null) {
+            throw new IllegalArgumentException("El usuario no puede ser nulo");
+        }
         this.usuarioActual = usuario;
+        this.rolActual = Rol.fromString(usuario.getRol());
     }
 
     public void cerrarSesion() {
         this.usuarioActual = null;
+        this.rolActual = null;
     }
 
     public boolean haySesionActiva() {
@@ -34,6 +41,34 @@ public final class SesionUsuario {
     }
 
     public void setUsuarioActual(Usuario usuario) {
-        this.usuarioActual = usuario;
+        iniciarSesion(usuario);
+    }
+
+    public Rol getRolActual() {
+        return rolActual;
+    }
+
+    public String getNombreCompleto() {
+        if (usuarioActual == null) return "";
+        String n = usuarioActual.getNombre() != null ? usuarioActual.getNombre() : "";
+        String a = usuarioActual.getApellido() != null ? usuarioActual.getApellido() : "";
+        return (n + " " + a).trim();
+    }
+
+    public boolean tienePermiso(String permiso) {
+        if (rolActual == null) return false;
+        return rolActual.tienePermiso(permiso);
+    }
+
+    public boolean esAdmin() {
+        return rolActual == Rol.ADMIN;
+    }
+
+    public boolean esCajero() {
+        return rolActual == Rol.CAJERO;
+    }
+
+    public boolean esBodega() {
+        return rolActual == Rol.BODEGA;
     }
 }

@@ -1,4 +1,4 @@
-
+/dist/
 **/nbproject/private/
 **/nbproject/Makefile-.mk
 **/nbproject/Package-.bash
@@ -9,3 +9,4 @@ nbdist/
 .nb-gradle/
 .atl/
 db.properties
+

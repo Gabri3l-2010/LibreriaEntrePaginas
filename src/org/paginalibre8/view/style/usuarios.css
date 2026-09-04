@@ -1,0 +1,69 @@
+.fondo {
+    -fx-background-color: #f4f6f9;
+}
+
+.encabezado {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.titulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+
+.subtitulo {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748b;
+}
+
+.btn-principal {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-principal:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.btn-secundario {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #334155;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-secundario:hover {
+    -fx-background-color: #cbd5e1;
+}
+
+.btn-desactivar {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-desactivar:hover {
+    -fx-background-color: #dc2626;
+}
+
+.estado-activo {
+    -fx-text-fill: #16a34a;
+    -fx-font-weight: bold;
+}
+
+.estado-inactivo {
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+}

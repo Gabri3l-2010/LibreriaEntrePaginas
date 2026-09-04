@@ -3,7 +3,7 @@ package org.paginalibre8.model;
 public class Usuario {
 
     private int id;
-    private String usrname;
+    private String username;
     private String rol;
     private String nombre;
     private String apellido;
@@ -15,13 +15,13 @@ public class Usuario {
 
     public Usuario(int id, String usrname, String rol) {
         this.id = id;
-        this.usrname = usrname;
+        this.username = usrname;
         this.rol = rol;
     }
 
     public Usuario(int id, String usrname, String rol, String nombre, String apellido, String correo, boolean activo) {
         this.id = id;
-        this.usrname = usrname;
+        this.username = usrname;
         this.rol = rol;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -38,19 +38,19 @@ public class Usuario {
     }
 
     public String getUsrname() {
-        return usrname;
+        return username;
     }
 
     public void setUsrname(String usrname) {
-        this.usrname = usrname;
+        this.username = usrname;
     }
 
     public String getUsername() {
-        return usrname;
+        return username;
     }
 
     public void setUsername(String username) {
-        this.usrname = username;
+        this.username = username;
     }
 
     public String getRol() {
