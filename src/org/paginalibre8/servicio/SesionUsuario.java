@@ -2,6 +2,9 @@ package org.paginalibre8.servicio;
 
 import org.paginalibre8.model.Usuario;
 
+/**
+ * Autor: Gabriel Chiu
+ */
 public final class SesionUsuario {
 
     private static SesionUsuario instancia;
@@ -19,6 +22,9 @@ public final class SesionUsuario {
         return instancia;
     }
 
+    /**
+     * Inicia la sesión con el usuario autenticado.
+     */
     public void iniciarSesion(Usuario usuario) {
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no puede ser nulo");
@@ -27,6 +33,9 @@ public final class SesionUsuario {
         this.rolActual = Rol.fromString(usuario.getRol());
     }
 
+    /**
+     * Cierra la sesión actual.
+     */
     public void cerrarSesion() {
         this.usuarioActual = null;
         this.rolActual = null;
@@ -38,10 +47,6 @@ public final class SesionUsuario {
 
     public Usuario getUsuarioActual() {
         return usuarioActual;
-    }
-
-    public void setUsuarioActual(Usuario usuario) {
-        iniciarSesion(usuario);
     }
 
     public Rol getRolActual() {
