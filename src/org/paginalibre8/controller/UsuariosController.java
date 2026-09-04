@@ -82,17 +82,15 @@ public class UsuariosController implements Initializable {
 
     @FXML
     private void guardarUsuario() {
-        // Aquí irá tu lógica de guardar
+      
     }
 
     @FXML
     private void modificarUsuario() {
-        // Aquí irá tu lógica de actualizar
     }
 
     @FXML
     private void eliminarUsuario() {
-        // Aquí irá tu lógica de desactivar/eliminar
     }
 
     @FXML

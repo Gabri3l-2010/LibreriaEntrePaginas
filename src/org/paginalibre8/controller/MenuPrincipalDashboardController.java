@@ -71,7 +71,7 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Gestión de Usuarios - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 900, 550));
+            stage.setScene(new Scene(root, 1050, 550));
             stage.show();
         } catch (Exception e) {
             mostrarError("Error al cargar la vista de gestión de usuarios:\n" + e.getMessage());
