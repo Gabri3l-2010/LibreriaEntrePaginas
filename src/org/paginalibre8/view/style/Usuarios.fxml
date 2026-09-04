@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.paginalibre8.controller.UsuariosController"
-            stylesheets="@style/usuarios.css" styleClass="fondo">
+            stylesheets="@usuarios.css" styleClass="fondo">
     <top>
         <VBox spacing="6" styleClass="encabezado">
             <padding><Insets top="22" right="24" bottom="16" left="24"/></padding>

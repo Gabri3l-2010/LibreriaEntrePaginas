@@ -70,10 +70,28 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
     }
 
     @FXML
-    private void handleSalir() {
-        Platform.exit();
+    private void handleUsuarios() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/Usuarios.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Gestión de Usuarios - Librería Entre Páginas");
+            stage.setScene(new javafx.scene.Scene(root, 900, 550));
+            stage.show();
+        } catch (Exception e) {
+            mostrarError("Error al cargar la vista de gestión de usuarios:\n" + e.getMessage());
+        }
     }
-    
+
+    @FXML
+    private void handleSalir() {
+        org.paginalibre8.servicio.SesionUsuario.getInstancia().cerrarSesion();
+        try {
+            org.paginalibre8.system.Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");
+        } catch (Exception e) {
+            Platform.exit();
+        }
+    }
 
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -82,5 +100,6 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
+
     
 }

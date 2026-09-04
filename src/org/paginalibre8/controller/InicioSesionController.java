@@ -43,11 +43,12 @@ public class InicioSesionController implements Initializable {
             return;
         }
         String passwordHash = SecurityUtil.hashSHA256(password);
-        Usuario usuarioIniciado = usuarioDAO.iniciarSesion(usuario,passwordHash);
+        Usuario usuarioIniciado = usuarioDAO.iniciarSesion(usuario, passwordHash);
         if (usuarioIniciado != null) {
+            org.paginalibre8.servicio.SesionUsuario.getInstancia().iniciarSesion(usuarioIniciado);
             lblMensaje.setText("Inicio correcto");
             abrirDashBoard(usuarioIniciado);
-        }else {
+        } else {
             lblMensaje.setText("Usuario o contraseña incorrectos");
         }
     }
@@ -63,34 +64,39 @@ public class InicioSesionController implements Initializable {
     }
 
     private void abrirDashBoard(Usuario usuario) {
-        String rutaFXML = "";
-        String tituloDashboard = "";
-        switch (usuario.getRol().toLowerCase()) {
-            case "admin":
-                rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
-                tituloDashboard = "Panel de Administracion";
-                break;
-            /*case "empleado":
-                rutaFXML = "/org/Deco/view/MenuPrincipalDashboardView.fxml";
-                tituloDashboard = "Panel de Empleado";
-                break;
-            case "cajero":
-                rutaFXML = "/org/Deco/view/MenuPrincipalDashboardView.fxml";
-                tituloDashboard = "Panel de Cajero";
-                break;*/
+        String rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
+        String tituloDashboard = "Panel Principal";
+        
+        if (usuario.getRol() != null) {
+            switch (usuario.getRol().toLowerCase()) {
+                case "admin":
+                case "administrador":
+                    rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
+                    tituloDashboard = "Panel de Administración - Librería Entre Páginas";
+                    break;
+                case "cajero":
+                case "empleado":
+                case "bodega":
+                default:
+                    rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
+                    tituloDashboard = "Panel Principal - Librería Entre Páginas (" + usuario.getRol() + ")";
+                    break;
+            }
         }
         try {
             FXMLLoader cargadorFXML = new FXMLLoader(getClass().getResource(rutaFXML));
             Parent raiz = cargadorFXML.load();
             DashboardController controlado = cargadorFXML.getController();
-            controlado.iniciarUsuario(usuario);
+            if (controlado != null) {
+                controlado.iniciarUsuario(usuario);
+            }
             Stage escenario = Main.getEscenarioPrincipal();
             escenario.setScene(new Scene(raiz));
             escenario.setTitle(tituloDashboard);
             escenario.show();
         } catch (IOException e) {
-            System.err.println("Error al cargar la vista:" + rutaFXML+ e.getMessage());
-            lblMensaje.setText("Error interno");
+            System.err.println("Error al cargar la vista:" + rutaFXML + e.getMessage());
+            lblMensaje.setText("Error interno al cargar la vista principal");
         }
     }    
 }

@@ -40,7 +40,7 @@ public class UsuariosController {
     @FXML
     private void initialize() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colUsuario.setCellValueFactory(new PropertyValueFactory<>("usrname"));
+        colUsuario.setCellValueFactory(new PropertyValueFactory<>("username"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colApellido.setCellValueFactory(new PropertyValueFactory<>("apellido"));
         colRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
@@ -64,18 +64,49 @@ public class UsuariosController {
 
     private void configurarAccion() {
         colAccion.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("Desactivar");
+            private final Button btnEditar = new Button("Editar");
+            private final Button btnDesactivar = new Button("Desactivar");
+            private final javafx.scene.layout.HBox panelAcciones = new javafx.scene.layout.HBox(6, btnEditar, btnDesactivar);
+
             {
-                btn.getStyleClass().add("btn-desactivar");
-                btn.setOnAction(e -> desactivar(getTableView().getItems().get(getIndex())));
+                btnEditar.getStyleClass().add("btn-secundario");
+                btnDesactivar.getStyleClass().add("btn-desactivar");
+                btnEditar.setOnAction(e -> abrirEdicion(getTableView().getItems().get(getIndex())));
+                btnDesactivar.setOnAction(e -> desactivar(getTableView().getItems().get(getIndex())));
             }
+
             @Override protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || getTableView().getItems().get(getIndex()).isActivo() == false) setGraphic(null);
-                else setGraphic(btn);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Usuario u = getTableView().getItems().get(getIndex());
+                    btnDesactivar.setVisible(u != null && u.isActivo());
+                    setGraphic(panelAcciones);
+                }
             }
         });
     }
+
+    private void abrirEdicion(Usuario usuario) {
+        if (usuario == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/UsuarioAlta.fxml"));
+            Parent root = loader.load();
+            UsuarioAltaController controller = loader.getController();
+            controller.setUsuarioParaEditar(usuario);
+
+            Stage stage = new Stage();
+            stage.setTitle("Editar Usuario - " + usuario.getUsername());
+            stage.setScene(new Scene(root, 520, 610));
+            stage.setResizable(false);
+            stage.setOnHidden(e -> cargarUsuarios());
+            stage.show();
+        } catch (IOException e) {
+            mostrarError("No se pudo abrir la edición de usuario: " + e.getMessage());
+        }
+    }
+
 
     @FXML
     private void onNuevoUsuario(ActionEvent event) {
