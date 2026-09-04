@@ -13,7 +13,6 @@ import org.paginalibre8.util.Conexion;
 
 public class UsuarioDAO {
 
-
     public Usuario iniciarSesion(String username, String passwordHash) {
         Usuario usuario = null;
         String sql = "{call sp_iniciar_sesion(?, ?)}";
@@ -27,7 +26,19 @@ public class UsuarioDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("No es posible iniciar sesion intentelo de nuevo: " + e.getMessage());
+            String sqlFallback = "SELECT id, username, rol, nombre, apellido, correo, activo FROM usuarios WHERE username = ? AND password_hash = ? AND activo = 1 LIMIT 1";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, username);
+                ps.setString(2, passwordHash);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        usuario = mapearUsuario(rs);
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("No es posible iniciar sesion: " + e2.getMessage());
+            }
         }
         return usuario;
     }
@@ -63,8 +74,7 @@ public class UsuarioDAO {
     /** Lista todos los usuarios para la vista JavaFX de gestión. */
     public List<Usuario> listarUsuarios() {
         List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT id, username, rol, nombre, apellido, correo, activo "
-                   + "FROM usuarios ORDER BY id";
+        String sql = "SELECT id, username, rol, nombre, apellido, correo, activo FROM usuarios ORDER BY id";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -92,7 +102,7 @@ public class UsuarioDAO {
             call.execute();
             return true;
         } catch (SQLException e) {
-            // Intentar con procedimiento de 3 parámetros (versión heredada)
+            // Intentar con procedimiento de 3 parámetros
             String sql3 = "{call sp_registrar_usuario(?, ?, ?)}";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  CallableStatement call = conexion.prepareCall(sql3)) {
@@ -121,9 +131,7 @@ public class UsuarioDAO {
         }
     }
 
-
-    /** Sobrecarga para autoregistro simple: usuario y contraseña únicamente.
-     *  Asigna rol "Empleado" por defecto y deja nombre/apellido/correo vacíos. */
+    /** Sobrecarga para autoregistro simple: usuario y contraseña únicamente. */
     public boolean registrarUsuario(String username, String passwordHash) {
         return registrarUsuario(username, passwordHash, "Empleado", "", "", "");
     }
@@ -160,6 +168,48 @@ public class UsuarioDAO {
         }
     }
 
+    /**
+     * Valida si la contraseña actual del usuario coincide con el hash almacenado (T1.24).
+     */
+    public boolean validarPasswordActual(int idUsuario, String passwordActualHash) {
+        String sql = "SELECT 1 FROM usuarios WHERE id = ? AND password_hash = ? LIMIT 1";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, passwordActualHash);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al validar contraseña actual: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza el hash de la contraseña de un usuario (T1.25).
+     */
+    public boolean cambiarPassword(int idUsuario, String nuevaPasswordHash) {
+        String sqlProc = "{call sp_cambiar_password(?, ?)}";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             CallableStatement call = conexion.prepareCall(sqlProc)) {
+            call.setInt(1, idUsuario);
+            call.setString(2, nuevaPasswordHash);
+            call.execute();
+            return true;
+        } catch (SQLException e) {
+            String sqlFallback = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, nuevaPasswordHash);
+                ps.setInt(2, idUsuario);
+                return ps.executeUpdate() > 0;
+            } catch (SQLException e2) {
+                System.err.println("Error al cambiar contraseña: " + e2.getMessage());
+                return false;
+            }
+        }
+    }
 
     public boolean existeUsername(String username) {
         String sql = "SELECT 1 FROM usuarios WHERE username = ? LIMIT 1";
@@ -180,13 +230,15 @@ public class UsuarioDAO {
         usuario.setId(rs.getInt("id"));
         usuario.setUsername(rs.getString("username"));
         usuario.setRol(rs.getString("rol"));
-        usuario.setNombre(rs.getString("nombre"));
-        usuario.setApellido(rs.getString("apellido"));
+        try {
+            usuario.setNombre(rs.getString("nombre"));
+        } catch (SQLException ignored) {}
+        try {
+            usuario.setApellido(rs.getString("apellido"));
+        } catch (SQLException ignored) {}
         try {
             usuario.setCorreo(rs.getString("correo"));
-        } catch (SQLException ignored) {
-            // Permite seguir funcionando si el procedimiento de login no devuelve correo.
-        }
+        } catch (SQLException ignored) {}
         try {
             usuario.setActivo(rs.getBoolean("activo"));
         } catch (SQLException ignored) {
