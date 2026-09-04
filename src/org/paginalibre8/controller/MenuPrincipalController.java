@@ -39,7 +39,23 @@ public class MenuPrincipalController {
         System.out.println("Abriendo sección de Editoriales...");
     }
     @FXML
+    public void handleCambiarPassword(ActionEvent event) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/CambioPasswordView.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Cambio de Contraseña - Librería Entre Páginas");
+            stage.setScene(new javafx.scene.Scene(root, 420, 340));
+            stage.setResizable(false);
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Error al abrir cambio de contraseña: " + e.getMessage());
+        }
+    }
+
+    @FXML
     public void handleSalir(ActionEvent event) {
         System.exit(0);
     }
-}
+}
