@@ -2,12 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package org.paginalibre8.util;
+package org.paginalibre8.controller;
 
-/**
- *
- * @author informatica
- */
-public class Segurityutil {
-    
+import org.paginalibre8.model.Usuario;
+
+public interface DashboardController {
+    void iniciarUsuario(Usuario usuario);
 }
