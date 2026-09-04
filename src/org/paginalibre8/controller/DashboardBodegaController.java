@@ -24,6 +24,10 @@ public class DashboardBodegaController implements Initializable, DashboardContro
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (SesionUsuario.getInstancia().haySesionActiva()) {
+            if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
+                mostrarAdvertencia("Acceso Denegado", "No cuentas con permisos para acceder al Panel de Bodega.");
+                return;
+            }
             this.usuarioActual = SesionUsuario.getInstancia().getUsuarioActual();
             if (lblUsuario != null) {
                 lblUsuario.setText("Bodega: " + SesionUsuario.getInstancia().getNombreCompleto());
@@ -41,11 +45,19 @@ public class DashboardBodegaController implements Initializable, DashboardContro
 
     @FXML
     private void handleInventario(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar el inventario.");
+            return;
+        }
         mostrarInfo("Módulo de Inventario", "Abriendo catálogo e inventario...");
     }
 
     @FXML
     private void handleCategorias(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar categorías.");
+            return;
+        }
         mostrarInfo("Módulo de Categorías", "Abriendo categorías y clasificación de libros...");
     }
 
@@ -76,6 +88,14 @@ public class DashboardBodegaController implements Initializable, DashboardContro
 
     private void mostrarInfo(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarAdvertencia(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);

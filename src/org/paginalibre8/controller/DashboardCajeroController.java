@@ -24,6 +24,10 @@ public class DashboardCajeroController implements Initializable, DashboardContro
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (SesionUsuario.getInstancia().haySesionActiva()) {
+            if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+                mostrarAdvertencia("Acceso Denegado", "No cuentas con permisos para acceder al Panel de Cajero.");
+                return;
+            }
             this.usuarioActual = SesionUsuario.getInstancia().getUsuarioActual();
             if (lblUsuario != null) {
                 lblUsuario.setText("Cajero: " + SesionUsuario.getInstancia().getNombreCompleto());
@@ -41,11 +45,19 @@ public class DashboardCajeroController implements Initializable, DashboardContro
 
     @FXML
     private void handleVentas(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para realizar ventas.");
+            return;
+        }
         mostrarInfo("Módulo de Ventas", "Abriendo Punto de Venta...");
     }
 
     @FXML
     private void handleClientes(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para consultar clientes.");
+            return;
+        }
         mostrarInfo("Módulo de Clientes", "Abriendo consulta de clientes...");
     }
 
@@ -76,6 +88,14 @@ public class DashboardCajeroController implements Initializable, DashboardContro
 
     private void mostrarInfo(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarAdvertencia(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
