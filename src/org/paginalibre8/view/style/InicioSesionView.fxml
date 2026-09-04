@@ -42,8 +42,7 @@
             <Font size="24.0" />
          </font>
       </Label>
-      <Button fx:id="btnIniciarSesion" layoutX="165.0" layoutY="332.0" mnemonicParsing="false" onAction="#eventoInicioSesion" prefHeight="30.0" prefWidth="120.0" text="INICIAR" />
-      <Button fx:id="btnRegistrarse" layoutX="295.0" layoutY="332.0" mnemonicParsing="false" onAction="#eventoIrRegistro" prefHeight="30.0" prefWidth="140.0" text="REGISTRARSE" />
+      <Button fx:id="btnIniciarSesion" layoutX="258.0" layoutY="333.0" mnemonicParsing="false" onAction="#eventoInicioSesion" prefHeight="30.0" prefWidth="120.0" text="INICIAR" />
       <Label fx:id="lblMensaje" layoutX="270.0" layoutY="303.0" text="Mensaje " textFill="#f50000d4" />
    </children>
 </AnchorPane>
