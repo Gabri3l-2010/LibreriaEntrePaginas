@@ -75,8 +75,13 @@ public class InicioSesionController implements Initializable {
                     tituloDashboard = "Panel de Administración - Librería Entre Páginas";
                     break;
                 case "cajero":
-                case "empleado":
+                    rutaFXML = "/org/paginalibre8/view/style/DashboardCajeroView.fxml";
+                    tituloDashboard = "Panel de Cajero - Librería Entre Páginas";
+                    break;
                 case "bodega":
+                    rutaFXML = "/org/paginalibre8/view/style/DashboardBodegaView.fxml";
+                    tituloDashboard = "Panel de Bodega - Librería Entre Páginas";
+                    break;
                 default:
                     rutaFXML = "/org/paginalibre8/view/style/MenuPrincipalDashboardView.fxml";
                     tituloDashboard = "Panel Principal - Librería Entre Páginas (" + usuario.getRol() + ")";

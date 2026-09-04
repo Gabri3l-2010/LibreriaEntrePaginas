@@ -10,22 +10,19 @@
             stylesheets="@menuprincipaldashboardview.css" 
             xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="org.paginalibre8.controller.MenuPrincipalDashboardController">
+            fx:controller="org.paginalibre8.controller.DashboardCajeroController">
     <top>
         <VBox alignment="CENTER" spacing="6">
             <padding><Insets top="25" bottom="15"/></padding>
-            <Label styleClass="title-label" text="Librería Entre Páginas - Panel Administrador" />
-            <Label fx:id="lblUsuario" text="Administrador" styleClass="subtitulo"/>
+            <Label styleClass="title-label" text="Librería Entre Páginas - Panel de Cajero" />
+            <Label fx:id="lblUsuario" text="Cajero" styleClass="subtitulo"/>
         </VBox>
     </top>
     <center>
         <VBox alignment="CENTER" spacing="15" styleClass="menu-container">
             <padding><Insets bottom="30" left="40" right="40" top="10" /></padding>
-            <Button fx:id="btnUsuarios" onAction="#handleUsuarios" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Gestión de Usuarios" />
+            <Button fx:id="btnVentas" onAction="#handleVentas" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Punto de Venta" />
             <Button fx:id="btnClientes" onAction="#handleClientes" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Clientes" />
-            <Button fx:id="btnAutores" onAction="#handleAutores" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Autores" />
-            <Button fx:id="btnCategorias" onAction="#handleCategorias" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Categorías" />
-            <Button fx:id="btnEditoriales" onAction="#handleEditoriales" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Editoriales" />
             <Button fx:id="btnCambiarPassword" onAction="#handleCambiarPassword" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Cambiar Contraseña" />
             <Button fx:id="btnSalir" onAction="#handleSalir" prefHeight="45" prefWidth="240" styleClass="exit-button" text="Cerrar Sesión" />
         </VBox>

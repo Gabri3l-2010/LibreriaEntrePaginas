@@ -2,7 +2,6 @@ package org.paginalibre8.controller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,65 +16,49 @@ import org.paginalibre8.model.Usuario;
 import org.paginalibre8.servicio.SesionUsuario;
 import org.paginalibre8.system.Main;
 
-public class MenuPrincipalDashboardController implements Initializable, DashboardController {
+public class DashboardCajeroController implements Initializable, DashboardController {
 
     @FXML private Label lblUsuario;
     private Usuario usuarioActual;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (SesionUsuario.getInstancia().haySesionActiva()) {
+            if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+                mostrarAdvertencia("Acceso Denegado", "No cuentas con permisos para acceder al Panel de Cajero.");
+                return;
+            }
             this.usuarioActual = SesionUsuario.getInstancia().getUsuarioActual();
             if (lblUsuario != null) {
-                lblUsuario.setText("Administrador: " + SesionUsuario.getInstancia().getNombreCompleto());
+                lblUsuario.setText("Cajero: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
-    }    
-    
+    }
+
     @Override
     public void iniciarUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
         if (lblUsuario != null && usuario != null) {
-            lblUsuario.setText("Administrador: " + usuario.getUsername());
+            lblUsuario.setText("Cajero: " + usuario.getUsername());
         }
     }
-    
-    @FXML
-    private void handleCategorias() {
-        mostrarInfo("Módulo de Categorías", "Abriendo gestión de categorías...");
-    }
 
     @FXML
-    private void handleEditoriales() {
-        mostrarInfo("Módulo de Editoriales", "Abriendo gestión de editoriales...");
-    }
-    
-    @FXML
-    private void handleClientes() {
-        mostrarInfo("Módulo de Clientes", "Abriendo gestión de clientes...");
-    }
-
-    @FXML
-    private void handleAutores() {
-        mostrarInfo("Módulo de Autores", "Abriendo gestión de autores...");
-    }
-
-    @FXML
-    private void handleUsuarios() {
-        if (!SesionUsuario.getInstancia().esAdmin()) {
-            mostrarAdvertencia("Acceso Denegado", "No cuentas con permisos suficientes para acceder a la Gestión de Usuarios.");
+    private void handleVentas(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para realizar ventas.");
             return;
         }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/Usuarios.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Gestión de Usuarios - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 900, 550));
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al cargar la vista de gestión de usuarios:\n" + e.getMessage());
+        mostrarInfo("Módulo de Ventas", "Abriendo Punto de Venta...");
+    }
+
+    @FXML
+    private void handleClientes(ActionEvent event) {
+        if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para consultar clientes.");
+            return;
         }
+        mostrarInfo("Módulo de Clientes", "Abriendo consulta de clientes...");
     }
 
     @FXML
@@ -94,12 +77,12 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
     }
 
     @FXML
-    private void handleSalir() {
+    private void handleSalir(ActionEvent event) {
         SesionUsuario.getInstancia().cerrarSesion();
         try {
             Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");
         } catch (Exception e) {
-            Platform.exit();
+            mostrarError("Error al cerrar sesión: " + e.getMessage());
         }
     }
 
