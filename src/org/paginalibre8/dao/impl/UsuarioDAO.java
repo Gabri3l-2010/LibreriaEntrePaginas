@@ -172,6 +172,49 @@ public class UsuarioDAO {
         }
     }
 
+    /**
+     * Valida si la contraseña actual del usuario coincide con el hash almacenado (T1.24).
+     */
+    public boolean validarPasswordActual(int idUsuario, String passwordActualHash) {
+        String sql = "SELECT 1 FROM usuarios WHERE id = ? AND password_hash = ? LIMIT 1";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            ps.setString(2, passwordActualHash);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al validar contraseña actual: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza el hash de la contraseña de un usuario (T1.25).
+     */
+    public boolean cambiarPassword(int idUsuario, String nuevaPasswordHash) {
+        String sqlProc = "{call sp_cambiar_password(?, ?)}";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             CallableStatement call = conexion.prepareCall(sqlProc)) {
+            call.setInt(1, idUsuario);
+            call.setString(2, nuevaPasswordHash);
+            call.execute();
+            return true;
+        } catch (SQLException e) {
+            String sqlFallback = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, nuevaPasswordHash);
+                ps.setInt(2, idUsuario);
+                return ps.executeUpdate() > 0;
+            } catch (SQLException e2) {
+                System.err.println("Error al cambiar contraseña: " + e2.getMessage());
+                return false;
+            }
+        }
+    }
+
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id"));
