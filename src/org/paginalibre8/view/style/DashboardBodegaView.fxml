@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="rootPane" styleClass="mainFxmlClass" 
+            stylesheets="@menuprincipaldashboardview.css" 
+            xmlns="http://javafx.com/javafx/21" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="org.paginalibre8.controller.DashboardBodegaController">
+    <top>
+        <VBox alignment="CENTER" spacing="6">
+            <padding><Insets top="25" bottom="15"/></padding>
+            <Label styleClass="title-label" text="Librería Entre Páginas - Panel de Bodega" />
+            <Label fx:id="lblUsuario" text="Bodega" styleClass="subtitulo"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox alignment="CENTER" spacing="15" styleClass="menu-container">
+            <padding><Insets bottom="30" left="40" right="40" top="10" /></padding>
+            <Button fx:id="btnInventario" onAction="#handleInventario" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Gestión de Inventario" />
+            <Button fx:id="btnCategorias" onAction="#handleCategorias" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Categorías y Libros" />
+            <Button fx:id="btnCambiarPassword" onAction="#handleCambiarPassword" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Cambiar Contraseña" />
+            <Button fx:id="btnSalir" onAction="#handleSalir" prefHeight="45" prefWidth="240" styleClass="exit-button" text="Cerrar Sesión" />
+        </VBox>
+    </center>
+</BorderPane>
