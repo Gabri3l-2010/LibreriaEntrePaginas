@@ -56,4 +56,3 @@ call sp_registrar_usuario('Empleado', sha2('empleado', 256), 'empleado', 'Emplea
 call sp_iniciar_sesion('Empleado', sha2('empleado', 256));   
 
 select * from usuarios;
- 
