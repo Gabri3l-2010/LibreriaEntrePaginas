@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -22,25 +23,25 @@
         <!-- Campos del Formulario -->
 
         <Label layoutX="30.0" layoutY="60.0" text="Usuario:" />
-        <TextField fx:id="txtId" layoutX="110.0" layoutY="55.0" prefWidth="180.0" promptText="Username" />
+        <TextField fx:id="txtUsername" layoutX="110.0" layoutY="55.0" prefWidth="180.0" promptText="Username" />
 
         <Label layoutX="30.0" layoutY="100.0" text="Contraseña:" />
-        <TextField fx:id="txtNombre" layoutX="110.0" layoutY="95.0" prefWidth="180.0" promptText="##########" />
+        <PasswordField fx:id="txtPassword" layoutX="110.0" layoutY="95.0" prefWidth="180.0" promptText="Mínimo 6 caracteres" />
 
         <Label layoutX="30.0" layoutY="140.0" text="Confirmar:" />
-        <TextField fx:id="txtApellido" layoutX="110.0" layoutY="135.0" prefWidth="180.0" promptText="#######" />
+        <PasswordField fx:id="txtConfirmar" layoutX="110.0" layoutY="135.0" prefWidth="180.0" promptText="Repite la contraseña" />
 
         <Label layoutX="30.0" layoutY="180.0" text="Rol:" />
-        <TextField fx:id="txtUsername" layoutX="110.0" layoutY="175.0" prefWidth="180.0" promptText="Ej. Cajero" />
+        <ComboBox fx:id="cmbRol" layoutX="110.0" layoutY="175.0" prefWidth="180.0" promptText="Seleccionar rol" />
 
         <Label layoutX="30.0" layoutY="220.0" text="Nombre:" />
-        <TextField fx:id="txtCorreo" layoutX="110.0" layoutY="215.0" prefWidth="180.0" promptText="Nombre" />
+        <TextField fx:id="txtNombre" layoutX="110.0" layoutY="215.0" prefWidth="180.0" promptText="Nombre" />
 
         <Label layoutX="30.0" layoutY="260.0" text="Apellido:" />
-        <TextField fx:id="txtRol" layoutX="110.0" layoutY="255.0" prefWidth="180.0" promptText="Apellido" />
+        <TextField fx:id="txtApellido" layoutX="110.0" layoutY="255.0" prefWidth="180.0" promptText="Apellido" />
 
         <Label layoutX="30.0" layoutY="300.0" text="Correo:" />
-        <TextField fx:id="txtRol1" layoutX="110.0" layoutY="295.0" prefWidth="180.0" promptText="Ej. Raf12@gmail.com" />
+        <TextField fx:id="txtCorreo" layoutX="110.0" layoutY="295.0" prefWidth="180.0" promptText="ejemplo@correo.com" />
 
         <!-- COMBOBOX DE ESTADO (Activo / Inactivo) -->
         <Label layoutX="30.0" layoutY="340.0" text="Estado:" />
