@@ -49,7 +49,16 @@ public class DashboardCajeroController implements Initializable, DashboardContro
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para realizar ventas.");
             return;
         }
-        mostrarInfo("Módulo de Ventas", "Abriendo Punto de Venta...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/VentaView.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Punto de Venta - Librería Entre Páginas");
+            stage.setScene(new Scene(root, 940, 660));
+            stage.show();
+        } catch (Exception e) {
+            mostrarError("Error al abrir el Punto de Venta:\n" + e.getMessage());
+        }
     }
 
     @FXML
