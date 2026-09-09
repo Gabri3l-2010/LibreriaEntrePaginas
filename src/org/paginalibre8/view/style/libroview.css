@@ -1,0 +1,70 @@
+.libro-root {
+    -fx-background-color: #3E3E3E;
+}
+
+.form-container {
+    -fx-background-color: #3E3E3E;
+}
+
+.section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.form-text {
+    -fx-background-color: white;
+    -fx-text-fill: #3E3E3E;
+    -fx-border-color: #012138;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.primary-button {
+    -fx-background-color: #012138;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #3E3E3E;
+}
+
+.table-button {
+    -fx-background-color: #012138;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.table-button:hover {
+    -fx-background-color: #3E3E3E;
+}
+
+.message-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.libro-table {
+    -fx-background-color: white;
+    -fx-border-color: #012138;
+    -fx-border-width: 2px;
+}
+
+.libro-table .column-header-background {
+    -fx-background-color: #012138;
+}
+
+.libro-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.libro-table .table-cell {
+    -fx-text-fill: #3E3E3E;
+}
