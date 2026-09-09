@@ -23,7 +23,6 @@ public class BuscadorLibrosController implements Initializable {
     @FXML private TextField txtBuscarIsbn;
     @FXML private TextField txtBuscarTitulo;
     @FXML private TextField txtBuscarAutor;
-    @FXML private Label lblEstado;
 
     @FXML private TableView<Libro> tblLibros;
     @FXML private TableColumn<Libro, String> colIsbn;
@@ -60,9 +59,6 @@ public class BuscadorLibrosController implements Initializable {
         List<Libro> libros = libroDAO.ListarTodos();
         if (libros != null && !libros.isEmpty()) {
             listaLibros.addAll(libros);
-            actualizarEstado("Se encontraron " + libros.size() + " libros en el catálogo.");
-        } else {
-            actualizarEstado("No hay libros registrados en el catálogo.");
         }
     }
 
@@ -78,9 +74,7 @@ public class BuscadorLibrosController implements Initializable {
         listaLibros.clear();
         if (libroEncontrado != null) {
             listaLibros.add(libroEncontrado);
-            actualizarEstado("Libro encontrado por ISBN: " + isbn);
         } else {
-            actualizarEstado("No se encontró ningún libro con el ISBN: " + isbn);
             mostrarInfo("Sin Resultados", "No existe ningún libro registrado con el ISBN proporcionado.");
         }
     }
@@ -97,9 +91,7 @@ public class BuscadorLibrosController implements Initializable {
         listaLibros.clear();
         if (librosEncontrados != null && !librosEncontrados.isEmpty()) {
             listaLibros.addAll(librosEncontrados);
-            actualizarEstado("Se encontraron " + librosEncontrados.size() + " libro(s) con el título: '" + titulo + "'");
         } else {
-            actualizarEstado("No se encontraron libros para el título: '" + titulo + "'");
             mostrarInfo("Sin Resultados", "No se encontraron libros que coincidan con la búsqueda por título.");
         }
     }
@@ -116,9 +108,7 @@ public class BuscadorLibrosController implements Initializable {
         listaLibros.clear();
         if (librosEncontrados != null && !librosEncontrados.isEmpty()) {
             listaLibros.addAll(librosEncontrados);
-            actualizarEstado("Se encontraron " + librosEncontrados.size() + " libro(s) del autor: '" + autor + "'");
         } else {
-            actualizarEstado("No se encontraron libros para el autor: '" + autor + "'");
             mostrarInfo("Sin Resultados", "No se encontraron libros registrados para ese autor.");
         }
     }
@@ -134,12 +124,6 @@ public class BuscadorLibrosController implements Initializable {
         txtBuscarTitulo.clear();
         txtBuscarAutor.clear();
         cargarTodosLosLibros();
-    }
-
-    private void actualizarEstado(String mensaje) {
-        if (lblEstado != null) {
-            lblEstado.setText(mensaje);
-        }
     }
 
     private void mostrarInfo(String titulo, String mensaje) {
