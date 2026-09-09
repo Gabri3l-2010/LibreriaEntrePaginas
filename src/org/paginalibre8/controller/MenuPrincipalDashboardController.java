@@ -64,9 +64,14 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
     @FXML
     private void handleLibros() {
         try {
-            org.paginalibre8.system.Main.cambiarEscena("/org/paginalibre8/view/style/LibroView.fxml");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/BuscadorLibrosView.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Buscador de Libros - Librería Entre Páginas");
+            stage.setScene(new Scene(root, 920, 640));
+            stage.show();
         } catch (Exception e) {
-            mostrarError("Error al cargar la vista de libros:\n" + e.getMessage());
+            mostrarError("Error al cargar el buscador de libros:\n" + e.getMessage());
         }
     }
 
