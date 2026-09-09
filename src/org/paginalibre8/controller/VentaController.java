@@ -14,7 +14,11 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.paginalibre8.dao.impl.LibroDAO;
 import org.paginalibre8.dao.impl.LibroDAOImpl;
 import org.paginalibre8.dao.impl.VentaDAO;
@@ -201,6 +205,22 @@ public class VentaController implements Initializable {
         boolean registrada = ventaDAO.registrarVentaTransaccional(venta);
 
         if (registrada) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/ComprobanteView.fxml"));
+                Parent root = loader.load();
+                ComprobanteController comprobanteCtrl = loader.getController();
+                if (comprobanteCtrl != null) {
+                    comprobanteCtrl.cargarComprobante(venta);
+                }
+                Stage stage = new Stage();
+                stage.setTitle("Comprobante de Venta #" + venta.getId());
+                stage.setScene(new Scene(root, 480, 620));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.show();
+            } catch (Exception e) {
+                System.err.println("Error al desplegar comprobante: " + e.getMessage());
+            }
+
             mostrarInfo("Venta Exitosa", "¡La venta #" + venta.getId() + " fue registrada exitosamente!\nTotal: Q" + String.format("%.2f", venta.getTotal()));
             carritoList.clear();
             txtNitCliente.setText("C/F");
