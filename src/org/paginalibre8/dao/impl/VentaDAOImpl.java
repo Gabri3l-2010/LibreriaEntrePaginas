@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.paginalibre8.model.DetalleVenta;
 import org.paginalibre8.model.Venta;
 import org.paginalibre8.util.Conexion;
 
