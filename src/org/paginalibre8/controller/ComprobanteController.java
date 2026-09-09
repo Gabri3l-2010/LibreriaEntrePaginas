@@ -92,8 +92,35 @@ public class ComprobanteController implements Initializable {
                 }
             }
         } else {
-            mostrarInfo("Impresión Simulada", "Generación e impresión de ticket completada con éxito.");
+            mostrarInfo("Impresión Simulada", "Generación e impresión de ticket en texto plano realizada con éxito:\n\n" + generarTextoPlanoTicket());
         }
+    }
+
+    public String generarTextoPlanoTicket() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("========================================\n");
+        sb.append("        LIBRERÍA ENTRE PÁGINAS        \n");
+        sb.append("  NIT: 1234567-8 | Tel: (502) 2222-0000 \n");
+        sb.append("========================================\n");
+        sb.append("Comprobante: ").append(lblNoComprobante != null ? lblNoComprobante.getText() : "#000000").append("\n");
+        sb.append("Fecha: ").append(lblFecha != null ? lblFecha.getText() : "").append("\n");
+        sb.append("Cajero: ").append(lblCajero != null ? lblCajero.getText() : "").append("\n");
+        sb.append("Cliente NIT: ").append(lblNitCliente != null ? lblNitCliente.getText() : "C/F").append("\n");
+        sb.append("----------------------------------------\n");
+        sb.append(String.format("%-5s %-20s %-8s %-8s\n", "Cant", "Descripción", "P.Unit", "Subtotal"));
+        sb.append("----------------------------------------\n");
+        for (DetalleVenta d : detallesList) {
+            String desc = d.getTituloLibro() != null && d.getTituloLibro().length() > 18
+                    ? d.getTituloLibro().substring(0, 18)
+                    : (d.getTituloLibro() != null ? d.getTituloLibro() : "");
+            sb.append(String.format("%-5d %-20s Q%-7.2f Q%-7.2f\n",
+                    d.getCantidad(), desc, d.getPrecioUnitario(), d.getSubtotal()));
+        }
+        sb.append("----------------------------------------\n");
+        sb.append("TOTAL CANCELADO: ").append(lblTotalVenta != null ? lblTotalVenta.getText() : "Q 0.00").append("\n");
+        sb.append("========================================\n");
+        sb.append("      ¡Gracias por su compra!         \n");
+        return sb.toString();
     }
 
     @FXML
