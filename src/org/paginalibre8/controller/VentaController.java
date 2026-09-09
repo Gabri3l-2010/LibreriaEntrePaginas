@@ -17,8 +17,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.paginalibre8.dao.impl.LibroDAO;
 import org.paginalibre8.dao.impl.LibroDAOImpl;
+import org.paginalibre8.dao.impl.VentaDAO;
+import org.paginalibre8.dao.impl.VentaDAOImpl;
 import org.paginalibre8.model.DetalleVenta;
 import org.paginalibre8.model.Libro;
+import org.paginalibre8.model.Usuario;
+import org.paginalibre8.model.Venta;
+import org.paginalibre8.servicio.SesionUsuario;
 
 public class VentaController implements Initializable {
 
@@ -37,12 +42,16 @@ public class VentaController implements Initializable {
     @FXML private Label lblTotal;
 
     private final LibroDAO libroDAO = new LibroDAOImpl();
+    private final VentaDAO ventaDAO = new VentaDAOImpl();
     private final ObservableList<DetalleVenta> carritoList = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         configurarTablaCarrito();
         configurarSpinner();
+        if (txtNitCliente != null) {
+            txtNitCliente.setText("C/F");
+        }
     }
 
     /**
@@ -67,7 +76,7 @@ public class VentaController implements Initializable {
     }
 
     /**
-     * T2.13 - Agregar/eliminar productos
+     * T2.13 & T2.17 - Agregar productos y Validar stock disponible
      */
     @FXML
     private void handleAgregarProducto(ActionEvent event) {
@@ -85,21 +94,28 @@ public class VentaController implements Initializable {
 
         int cantidad = spnCantidad.getValue() != null ? spnCantidad.getValue() : 1;
 
-        // Verificar si ya está en el carrito (T2.14)
+        // T2.17: Validar stock disponible
+        int cantidadEnCarrito = 0;
         DetalleVenta existente = null;
         for (DetalleVenta d : carritoList) {
             if (d.getIsbnLibro().equalsIgnoreCase(libro.getIsbn())) {
                 existente = d;
+                cantidadEnCarrito = d.getCantidad();
                 break;
             }
         }
 
+        if (libro.getStock() > 0 && (cantidadEnCarrito + cantidad) > libro.getStock()) {
+            mostrarAdvertencia("Stock Insuficiente",
+                    "El libro '" + libro.getTitulo() + "' solo cuenta con " + libro.getStock() +
+                    " unidades disponibles en stock.");
+            return;
+        }
+
         if (existente != null) {
-            // Actualizar cantidad (T2.14) y recargar subtotal (T2.15)
             existente.setCantidad(existente.getCantidad() + cantidad);
             tblCarrito.refresh();
         } else {
-            // Agregar nuevo ítem al carrito (T2.13)
             DetalleVenta nuevo = new DetalleVenta(libro.getIsbn(), libro.getTitulo(), cantidad, libro.getPrecio());
             carritoList.add(nuevo);
         }
@@ -138,22 +154,62 @@ public class VentaController implements Initializable {
     private void calcularTotal() {
         double sumaTotal = 0.0;
         for (DetalleVenta d : carritoList) {
-            d.calcularSubtotal(); // T2.15: Calcular subtotal
+            d.calcularSubtotal();
             sumaTotal += d.getSubtotal();
         }
-        sumaTotal = Math.round(sumaTotal * 100.0) / 100.0; // T2.16: Calcular total
+        sumaTotal = Math.round(sumaTotal * 100.0) / 100.0;
         if (lblTotal != null) {
             lblTotal.setText(String.format("Q %.2f", sumaTotal));
         }
     }
 
+    /**
+     * T2.18, T2.19, T2.20 & T2.21 - Procesar Venta con Transacción JDBC, Actualización de Stock, Rollback y Pruebas
+     */
     @FXML
     private void handleProcesarVenta(ActionEvent event) {
         if (carritoList.isEmpty()) {
             mostrarAdvertencia("Carrito Vacío", "No hay productos en el carrito para procesar la venta.");
             return;
         }
-        mostrarInfo("Procesando Venta", "El carrito cuenta con " + carritoList.size() + " producto(s). Listo para validación de transacción.");
+
+        String nit = txtNitCliente.getText() != null ? txtNitCliente.getText().trim() : "C/F";
+        if (nit.isEmpty()) {
+            nit = "C/F";
+        }
+
+        int idUsuario = 1;
+        if (SesionUsuario.getInstancia().haySesionActiva()) {
+            Usuario u = SesionUsuario.getInstancia().getUsuarioActual();
+            if (u != null && u.getId() > 0) {
+                idUsuario = u.getId();
+            }
+        }
+
+        Venta venta = new Venta(idUsuario, nit);
+        for (DetalleVenta d : carritoList) {
+            venta.agregarDetalle(d);
+        }
+
+        // T2.17: Validar stock final antes de la transacción
+        if (!ventaDAO.validarStockVenta(venta)) {
+            mostrarError("Error de Stock", "Uno o más productos del carrito no cuentan con suficiente stock disponible.");
+            return;
+        }
+
+        // T2.18, T2.19 & T2.20: Transacción JDBC + Actualización de Stock + Rollback
+        boolean registrada = ventaDAO.registrarVentaTransaccional(venta);
+
+        if (registrada) {
+            mostrarInfo("Venta Exitosa", "¡La venta #" + venta.getId() + " fue registrada exitosamente!\nTotal: Q" + String.format("%.2f", venta.getTotal()));
+            carritoList.clear();
+            txtNitCliente.setText("C/F");
+            txtNombreCliente.clear();
+            txtIsbn.clear();
+            calcularTotal();
+        } else {
+            mostrarError("Error en Transacción", "No fue posible procesar la venta. Se ha revertido la operación (Rollback).");
+        }
     }
 
     private void mostrarInfo(String titulo, String mensaje) {
