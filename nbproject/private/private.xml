@@ -8,6 +8,10 @@
             <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/dao/impl/UsuarioDAO.java</file>
             <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/nbproject/project.properties</file>
             <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/CambioPasswordController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/UsuariosController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/InicioSesionController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/DashboardController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/servicio/Rol.java</file>
         </group>
     </open-files>
 </project-private>
