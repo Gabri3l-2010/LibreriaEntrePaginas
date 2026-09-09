@@ -17,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.paginalibre8.dao.impl.LibroDAO;
