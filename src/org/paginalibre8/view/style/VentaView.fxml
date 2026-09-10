@@ -72,7 +72,7 @@
                 <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: #eef2f7; -fx-padding: 12; -fx-background-radius: 6;">
                     <Label text="Total a Pagar:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
                     <Label fx:id="lblTotal" text="Q 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2b579a;"/>
-                    <Button fx:id="btnProcesarVenta" text="Registrar Venta" onAction="#handleProcesarVenta" styleClass="menu-button" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;"/>
+                    <Button fx:id="btnProcesarVenta" text="Registrar Venta" onAction="#handleProcesarVenta" styleClass="menu-button"/>
                 </HBox>
             </VBox>
         </VBox>

@@ -75,7 +75,7 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" spacing="12" style="-fx-padding: 15; -fx-background-color: #f8f9fa;">
             <Button fx:id="btnCerrar" text="Cerrar" onAction="#handleCerrar" styleClass="exit-button"/>
-            <Button fx:id="btnImprimir" text="Imprimir Ticket" onAction="#handleImprimir" styleClass="menu-button" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button fx:id="btnImprimir" text="Imprimir Ticket" onAction="#handleImprimir" styleClass="menu-button"/>
         </HBox>
     </bottom>
 </BorderPane>
