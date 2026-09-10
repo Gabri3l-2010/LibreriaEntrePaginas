@@ -228,6 +228,57 @@ public class VentaDAOImpl implements VentaDAO {
         }
     }
 
+    @Override
+    public List<Venta> obtenerVentasDelDia() {
+        List<Venta> ventas = new ArrayList<>();
+        String sqlProc = "{call sp_obtener_ventas_del_dia()}";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             CallableStatement call = conexion.prepareCall(sqlProc);
+             ResultSet rs = call.executeQuery()) {
+            while (rs.next()) {
+                ventas.add(mapearVenta(rs));
+            }
+        } catch (SQLException e) {
+            String sqlFallback = "SELECT v.*, u.username AS username_usuario, c.nombre AS nombre_cliente "
+                               + "FROM ventas v "
+                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id "
+                               + "LEFT JOIN clientes c ON v.nit_cliente = c.nit "
+                               + "WHERE DATE(v.fecha) = CURDATE() ORDER BY v.id DESC";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ventas.add(mapearVenta(rs));
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al obtener ventas del día: " + e2.getMessage());
+            }
+        }
+        return ventas;
+    }
+
+    @Override
+    public List<Venta> obtenerVentasDelDiaPorUsuario(int idUsuario) {
+        List<Venta> ventas = new ArrayList<>();
+        String sqlFallback = "SELECT v.*, u.username AS username_usuario, c.nombre AS nombre_cliente "
+                           + "FROM ventas v "
+                           + "LEFT JOIN usuarios u ON v.id_usuario = u.id "
+                           + "LEFT JOIN clientes c ON v.nit_cliente = c.nit "
+                           + "WHERE DATE(v.fecha) = CURDATE() AND v.id_usuario = ? ORDER BY v.id DESC";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ventas.add(mapearVenta(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener ventas del día por usuario: " + e.getMessage());
+        }
+        return ventas;
+    }
+
     private Venta mapearVenta(ResultSet rs) throws SQLException {
         Venta v = new Venta();
         v.setId(rs.getInt("id"));

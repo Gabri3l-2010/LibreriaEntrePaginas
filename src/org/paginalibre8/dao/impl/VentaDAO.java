@@ -9,4 +9,6 @@ public interface VentaDAO {
     boolean validarStockVenta(Venta venta);
     Venta buscarPorId(int idVenta);
     List<Venta> listarVentas();
+    List<Venta> obtenerVentasDelDia();
+    List<Venta> obtenerVentasDelDiaPorUsuario(int idUsuario);
 }
