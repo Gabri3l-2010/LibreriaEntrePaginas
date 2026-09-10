@@ -49,7 +49,16 @@ public class DashboardBodegaController implements Initializable, DashboardContro
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar el inventario.");
             return;
         }
-        mostrarInfo("Módulo de Inventario", "Abriendo catálogo e inventario...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/BuscadorLibrosView.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Buscador de Libros - Librería Entre Páginas");
+            stage.setScene(new Scene(root, 920, 640));
+            stage.show();
+        } catch (Exception e) {
+            mostrarError("Error al cargar el buscador de libros:\n" + e.getMessage());
+        }
     }
 
     @FXML

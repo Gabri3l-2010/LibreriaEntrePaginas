@@ -19,9 +19,10 @@ import org.paginalibre8.system.Main;
 
 public class MenuPrincipalDashboardController implements Initializable, DashboardController {
 
-    @FXML private Label lblUsuario;
+    @FXML
+    private Label lblUsuario;
     private Usuario usuarioActual;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (SesionUsuario.getInstancia().haySesionActiva()) {
@@ -30,8 +31,8 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
                 lblUsuario.setText("Administrador: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
-    }    
-    
+    }
+
     @Override
     public void iniciarUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
@@ -39,7 +40,7 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
             lblUsuario.setText("Administrador: " + usuario.getUsername());
         }
     }
-    
+
     @FXML
     private void handleCategorias() {
         mostrarInfo("Módulo de Categorías", "Abriendo gestión de categorías...");
@@ -49,7 +50,7 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
     private void handleEditoriales() {
         mostrarInfo("Módulo de Editoriales", "Abriendo gestión de editoriales...");
     }
-    
+
     @FXML
     private void handleClientes() {
         mostrarInfo("Módulo de Clientes", "Abriendo gestión de clientes...");
@@ -58,6 +59,20 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
     @FXML
     private void handleAutores() {
         mostrarInfo("Módulo de Autores", "Abriendo gestión de autores...");
+    }
+
+    @FXML
+    private void handleLibros() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/BuscadorLibrosView.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Buscador de Libros - Librería Entre Páginas");
+            stage.setScene(new Scene(root, 920, 640));
+            stage.show();
+        } catch (Exception e) {
+            mostrarError("Error al cargar el buscador de libros:\n" + e.getMessage());
+        }
     }
 
     @FXML
