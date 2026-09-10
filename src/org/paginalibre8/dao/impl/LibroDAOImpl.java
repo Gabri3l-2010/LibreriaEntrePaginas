@@ -135,9 +135,7 @@ public class LibroDAOImpl implements LibroDAO {
         return buscarPorIsbn(isbn);
     }
 
-    /**
-     * T2.3 - Consulta por ISBN
-     */
+
     @Override
     public Libro buscarPorIsbn(String isbn) {
         if (isbn == null || isbn.trim().isEmpty()) {
@@ -170,9 +168,7 @@ public class LibroDAOImpl implements LibroDAO {
         return null;
     }
 
-    /**
-     * T2.4 - Consulta por título
-     */
+  
     @Override
     public List<Libro> buscarPorTitulo(String titulo) {
         List<Libro> resultados = new ArrayList<>();
@@ -194,9 +190,7 @@ public class LibroDAOImpl implements LibroDAO {
         return resultados;
     }
 
-    /**
-     * T2.5 - Consulta por autor
-     */
+
     @Override
     public List<Libro> buscarPorAutor(String autor) {
         List<Libro> resultados = new ArrayList<>();

@@ -1,6 +1,6 @@
 package org.paginalibre8.servicio;
 
-import org.paginalibre8.dao.impl.UsuarioDAO;
+import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.util.SecurityUtil;
 
@@ -8,7 +8,7 @@ import org.paginalibre8.util.SecurityUtil;
 
 public class AutenticacionService {
 
-    private final UsuarioDAO usuarioDao = new UsuarioDAO();
+    private final UsuarioDAOImpl usuarioDao = new UsuarioDAOImpl();
 
 public ResultadoLogin autenticar(String username, String passwordPlano) {
     if (username == null || username.trim().isEmpty()

@@ -14,7 +14,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import org.paginalibre8.dao.impl.UsuarioDAO;
+import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.system.Main;
 import org.paginalibre8.util.SecurityUtil;
@@ -26,11 +26,11 @@ public class InicioSesionController implements Initializable {
     @FXML private Button btnIniciarSesion;
     @FXML private Button btnRegistrarse;
     @FXML private Label lblMensaje;
-    @FXML private UsuarioDAO usuarioDAO;
+    @FXML private UsuarioDAOImpl usuarioDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        usuarioDAO = new UsuarioDAO();
+        usuarioDAO = new UsuarioDAOImpl();
         lblMensaje.setText("");
     }
 

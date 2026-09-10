@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.paginalibre8.dao.impl.UsuarioDAO;
+import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.system.Main;
 import org.paginalibre8.util.SecurityUtil;
 import org.paginalibre8.util.ValidacionException;
@@ -25,11 +25,11 @@ public class RegistrarUsuarioController implements Initializable {
     @FXML private Button btnRegistrar;
     @FXML private Button btnRegresar;
     @FXML private Label lblMensaje;
-    private UsuarioDAO usuarioDAO;
+    private UsuarioDAOImpl usuarioDAO;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        usuarioDAO = new UsuarioDAO();
+        usuarioDAO = new UsuarioDAOImpl();
         if (lblMensaje != null) {
             lblMensaje.setText("");
         }
