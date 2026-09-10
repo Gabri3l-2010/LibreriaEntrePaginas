@@ -7,6 +7,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.util.SecurityUtil;
@@ -21,7 +22,7 @@ public class UsuarioAltaController {
     @FXML private TextField txtApellido;
     @FXML private TextField txtCorreo;
 
-    private final UsuarioDAOImpl usuarioDao = new UsuarioDAOImpl();
+    private final UsuarioDAO usuarioDao = new UsuarioDAOImpl();
     private Usuario usuarioEditar = null;
 
     @FXML

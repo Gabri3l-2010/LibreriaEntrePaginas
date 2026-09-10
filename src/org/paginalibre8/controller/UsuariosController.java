@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.util.SecurityUtil;
@@ -36,7 +37,7 @@ public class UsuariosController implements Initializable {
     @FXML private TableColumn<Usuario, String> colEstado;
     @FXML private TableColumn<Usuario, Void> colAccion;
 
-    private final UsuarioDAOImpl usuarioDAO = new UsuarioDAOImpl();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
     private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
 
     @Override

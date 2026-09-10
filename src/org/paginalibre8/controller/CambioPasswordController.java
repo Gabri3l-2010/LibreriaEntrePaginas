@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
+import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.dao.impl.UsuarioDAOImpl;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.servicio.SesionUsuario;
@@ -21,7 +22,7 @@ public class CambioPasswordController implements Initializable {
     @FXML private PasswordField txtConfirmarPassword;
     @FXML private Label lblMensaje;
 
-    private final UsuarioDAOImpl usuarioDao = new UsuarioDAOImpl();
+    private final UsuarioDAO usuarioDao = new UsuarioDAOImpl();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

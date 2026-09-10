@@ -1,20 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 package org.paginalibre8.dao.impl;
 
-
-import java.util.ArrayList;
+import java.util.List;
 import org.paginalibre8.model.Usuario;
 
- interface UsuarioDAO {
-    public Usuario iniciarSesion(String usernarme, String passwordHash);
-    public boolean crearUsuario(Usuario usuario);
-    public boolean actualizarUsuario(Usuario usuario);
-    public boolean cambiarPassword(int idUsuario, String passwordHash);
-    public boolean desactivarUsuario(int idUsuario);
-    public boolean eliminarUsuario(int idUsuario);
-    public ArrayList<Usuario> listarTodosUsuarios();
-    public Usuario obtenerUsuarioPorId(int idUsuario);
+public interface UsuarioDAO {
+    Usuario iniciarSesion(String username, String passwordHash);
+    Usuario buscarPorUsername(String username);
+    Usuario obtenerUsuarioPorId(int idUsuario);
+    List<Usuario> listarUsuarios();
+    List<Usuario> listarTodosUsuarios();
+    boolean registrarUsuario(String username, String passwordHash, String rol, String nombre, String apellido, String correo);
+    boolean registrarUsuario(String username, String passwordHash);
+    boolean crearUsuario(Usuario usuario);
+    boolean actualizarUsuario(Usuario usuario);
+    boolean desactivarUsuario(int idUsuario);
+    boolean eliminarUsuario(int idUsuario);
+    boolean existeUsername(String username);
+    boolean validarPasswordActual(int idUsuario, String passwordActualHash);
+    boolean cambiarPassword(int idUsuario, String nuevaPasswordHash);
 }
