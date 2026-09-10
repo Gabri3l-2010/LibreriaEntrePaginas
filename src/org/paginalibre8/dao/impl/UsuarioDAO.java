@@ -12,8 +12,7 @@ import org.paginalibre8.model.Usuario;
 import org.paginalibre8.util.Conexion;
 
 public class UsuarioDAO {
-
-    public Usuario iniciarSesion(String username, String passwordHash) {
+public Usuario iniciarSesion(String username, String passwordHash) {
         Usuario usuario = null;
         String sql = "{call sp_iniciar_sesion(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
@@ -71,7 +70,6 @@ public class UsuarioDAO {
         return usuario;
     }
 
-    /** Lista todos los usuarios para la vista JavaFX de gestión. */
     public List<Usuario> listarUsuarios() {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM usuarios";
@@ -87,7 +85,6 @@ public class UsuarioDAO {
         return usuarios;
     }
 
-    /** Registro completo: usado por el alta de usuarios desde administración. */
     public boolean registrarUsuario(String username, String passwordHash, String rol,
                                     String nombre, String apellido, String correo) {
         String sql6 = "{call sp_registrar_usuario(?, ?, ?, ?, ?, ?)}";
@@ -102,7 +99,6 @@ public class UsuarioDAO {
             call.execute();
             return true;
         } catch (SQLException e) {
-            // Intentar con procedimiento de 3 parámetros (versión heredada)
             String sql3 = "{call sp_registrar_usuario(?, ?, ?)}";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  CallableStatement call = conexion.prepareCall(sql3)) {
@@ -112,7 +108,6 @@ public class UsuarioDAO {
                 call.execute();
                 return true;
             } catch (SQLException e2) {
-                // Fallback a sentencia INSERT directa
                 String sqlInsert = "INSERT INTO usuarios (username, password_hash, rol, nombre, apellido, correo) VALUES (?, ?, ?, ?, ?, ?)";
                 try (Connection conexion = Conexion.getInstancia().conectar();
                      PreparedStatement ps = conexion.prepareStatement(sqlInsert)) {
@@ -131,13 +126,11 @@ public class UsuarioDAO {
         }
     }
 
-    /** Sobrecarga para autoregistro simple: usuario y contraseña únicamente.
-     *  Asigna rol "cajero" por defecto y deja nombre/apellido/correo vacíos. */
+   
     public boolean registrarUsuario(String username, String passwordHash) {
         return registrarUsuario(username, passwordHash, "cajero", "", "", "");
     }
 
-    /** Desactivación lógica: el registro permanece en la base de datos. */
     public boolean desactivarUsuario(int id) {
         String sql = "UPDATE usuarios SET activo = 0 WHERE id_usuario = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
@@ -203,9 +196,7 @@ public class UsuarioDAO {
         }
     }
 
-    /**
-     * Valida si la contraseña actual del usuario coincide con el hash almacenado (T1.24).
-     */
+    
     public boolean validarPasswordActual(int idUsuario, String passwordActualHash) {
         String sql = "SELECT 1 FROM usuarios WHERE id_usuario = ? AND password_hash = ? LIMIT 1";
         try (Connection conexion = Conexion.getInstancia().conectar();
@@ -231,9 +222,7 @@ public class UsuarioDAO {
         }
     }
 
-    /**
-     * Actualiza el hash de la contraseña de un usuario (T1.25).
-     */
+    
     public boolean cambiarPassword(int idUsuario, String nuevaPasswordHash) {
         String sqlProc = "{call sp_cambiar_password(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
@@ -278,7 +267,7 @@ public class UsuarioDAO {
         try {
             usuario.setCorreo(rs.getString("correo"));
         } catch (SQLException ignored) {
-            // Permite seguir funcionando si el procedimiento de login no devuelve correo.
+            
         }
         try {
             usuario.setActivo(rs.getBoolean("activo"));
