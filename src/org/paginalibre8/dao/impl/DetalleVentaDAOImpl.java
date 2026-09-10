@@ -56,7 +56,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
     @Override
     public List<DetalleVenta> obtenerDetallesPorVenta(int idVenta) {
         List<DetalleVenta> lista = new ArrayList<>();
-        String sqlProc = "{call sp_obtener_detalles_venta(?)}";
+        String sqlProc = "{call sp_obtener_detalles_por_venta(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement call = conexion.prepareCall(sqlProc)) {
             call.setInt(1, idVenta);

@@ -11,8 +11,9 @@ import java.util.List;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.util.Conexion;
 
-public class UsuarioDAOImpl {
-public Usuario iniciarSesion(String username, String passwordHash) {
+public class UsuarioDAOImpl implements UsuarioDAO {
+    @Override
+    public Usuario iniciarSesion(String username, String passwordHash) {
         Usuario usuario = null;
         String sql = "{call sp_iniciar_sesion(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
@@ -72,15 +73,24 @@ public Usuario iniciarSesion(String username, String passwordHash) {
 
     public List<Usuario> listarUsuarios() {
         List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT * FROM usuarios";
+        String sql = "{call sp_listar_usuarios()}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql);
+             ResultSet rs = call.executeQuery()) {
             while (rs.next()) {
                 usuarios.add(mapearUsuario(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error al listar usuarios: " + e.getMessage());
+            String sqlFallback = "SELECT * FROM usuarios";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback);
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    usuarios.add(mapearUsuario(rs));
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al listar usuarios: " + e2.getMessage());
+            }
         }
         return usuarios;
     }
@@ -132,13 +142,13 @@ public Usuario iniciarSesion(String username, String passwordHash) {
     }
 
     public boolean desactivarUsuario(int id) {
-        String sql = "UPDATE usuarios SET activo = 0 WHERE id_usuario = ?";
+        String sql = "{call sp_desactivar_usuario(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setInt(1, id);
+            return call.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlFallback = "UPDATE usuarios SET activo = 0 WHERE id = ?";
+            String sqlFallback = "UPDATE usuarios SET activo = 0 WHERE id_usuario = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setInt(1, id);
@@ -152,19 +162,19 @@ public Usuario iniciarSesion(String username, String passwordHash) {
 
     /** Actualización de los datos de un usuario existente (T1.13). */
     public boolean actualizarUsuario(Usuario usuario) {
-        String sql = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id_usuario = ?";
+        String sql = "{call sp_actualizar_usuario(?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, usuario.getUsername());
-            ps.setString(2, usuario.getRol());
-            ps.setString(3, usuario.getNombre());
-            ps.setString(4, usuario.getApellido());
-            ps.setString(5, usuario.getCorreo());
-            ps.setBoolean(6, usuario.isActivo());
-            ps.setInt(7, usuario.getId());
-            return ps.executeUpdate() > 0;
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setInt(1, usuario.getId());
+            call.setString(2, usuario.getUsername());
+            call.setString(3, usuario.getRol());
+            call.setString(4, usuario.getNombre());
+            call.setString(5, usuario.getApellido());
+            call.setString(6, usuario.getCorreo());
+            call.setBoolean(7, usuario.isActivo());
+            return call.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlFallback = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id = ?";
+            String sqlFallback = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id_usuario = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setString(1, usuario.getUsername());
@@ -183,31 +193,40 @@ public Usuario iniciarSesion(String username, String passwordHash) {
     }
 
     public boolean existeUsername(String username) {
-        String sql = "SELECT 1 FROM usuarios WHERE username = ? LIMIT 1";
+        String sql = "{call sp_existe_username(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setString(1, username);
+            try (ResultSet rs = call.executeQuery()) {
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.err.println("Error al validar username: " + e.getMessage());
-            return false;
+            String sqlFallback = "SELECT 1 FROM usuarios WHERE username = ? LIMIT 1";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, username);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next();
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al validar username: " + e2.getMessage());
+                return false;
+            }
         }
     }
 
     
     public boolean validarPasswordActual(int idUsuario, String passwordActualHash) {
-        String sql = "SELECT 1 FROM usuarios WHERE id_usuario = ? AND password_hash = ? LIMIT 1";
+        String sql = "{call sp_validar_password(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setInt(1, idUsuario);
-            ps.setString(2, passwordActualHash);
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setInt(1, idUsuario);
+            call.setString(2, passwordActualHash);
+            try (ResultSet rs = call.executeQuery()) {
                 return rs.next();
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT 1 FROM usuarios WHERE id = ? AND password_hash = ? LIMIT 1";
+            String sqlFallback = "SELECT 1 FROM usuarios WHERE id_usuario = ? AND password_hash = ? LIMIT 1";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setInt(1, idUsuario);
@@ -251,6 +270,49 @@ public Usuario iniciarSesion(String username, String passwordHash) {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean crearUsuario(Usuario usuario) {
+        return registrarUsuario(usuario.getUsername(), "", usuario.getRol(), usuario.getNombre(), usuario.getApellido(), usuario.getCorreo());
+    }
+
+    @Override
+    public boolean eliminarUsuario(int idUsuario) {
+        return desactivarUsuario(idUsuario);
+    }
+
+    @Override
+    public List<Usuario> listarTodosUsuarios() {
+        return listarUsuarios();
+    }
+
+    @Override
+    public Usuario obtenerUsuarioPorId(int idUsuario) {
+        String sql = "{call sp_obtener_usuario_por_id(?)}";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setInt(1, idUsuario);
+            try (ResultSet rs = call.executeQuery()) {
+                if (rs.next()) {
+                    return mapearUsuario(rs);
+                }
+            }
+        } catch (SQLException e) {
+            String sqlFallback = "SELECT * FROM usuarios WHERE id_usuario = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setInt(1, idUsuario);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return mapearUsuario(rs);
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al obtener usuario por ID: " + e2.getMessage());
+            }
+        }
+        return null;
     }
 
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {

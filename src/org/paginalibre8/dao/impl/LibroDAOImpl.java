@@ -175,17 +175,28 @@ public class LibroDAOImpl implements LibroDAO {
         if (titulo == null || titulo.trim().isEmpty()) {
             return ListarTodos();
         }
-        String sql = "SELECT * FROM libros WHERE LOWER(titulo) LIKE LOWER(?)";
+        String sql = "{call sp_buscar_libros_por_titulo(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, "%" + titulo.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setString(1, titulo.trim());
+            try (ResultSet rs = call.executeQuery()) {
                 while (rs.next()) {
                     resultados.add(mapearLibro(rs));
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar Libros por título: " + e.getMessage());
+            String sqlFallback = "SELECT * FROM libros WHERE LOWER(titulo) LIKE LOWER(?)";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, "%" + titulo.trim() + "%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        resultados.add(mapearLibro(rs));
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al buscar Libros por título: " + e2.getMessage());
+            }
         }
         return resultados;
     }
@@ -197,21 +208,32 @@ public class LibroDAOImpl implements LibroDAO {
         if (autor == null || autor.trim().isEmpty()) {
             return ListarTodos();
         }
-        String sql = "SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor "
-                   + "FROM libros l "
-                   + "JOIN autores_libro al ON l.isbn = al.isbn "
-                   + "JOIN autores a ON al.id_autor = a.id_autor "
-                   + "WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(?)";
+        String sql = "{call sp_buscar_libros_por_autor(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, "%" + autor.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setString(1, autor.trim());
+            try (ResultSet rs = call.executeQuery()) {
                 while (rs.next()) {
                     resultados.add(mapearLibro(rs));
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar Libros por autor: " + e.getMessage());
+            String sqlFallback = "SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor "
+                               + "FROM libros l "
+                               + "JOIN autores_libro al ON l.isbn = al.isbn "
+                               + "JOIN autores a ON al.id_autor = a.id_autor "
+                               + "WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(?)";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, "%" + autor.trim() + "%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        resultados.add(mapearLibro(rs));
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al buscar Libros por autor: " + e2.getMessage());
+            }
         }
         return resultados;
     }

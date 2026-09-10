@@ -63,7 +63,7 @@ public class VentaDAOImpl implements VentaDAO {
 
     @Override
     public Venta buscarPorId(int idVenta) {
-        String sqlProc = "{call sp_buscar_venta(?)}";
+        String sqlProc = "{call sp_buscar_venta_por_id(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement call = conexion.prepareCall(sqlProc)) {
             call.setInt(1, idVenta);
@@ -123,12 +123,12 @@ public class VentaDAOImpl implements VentaDAO {
         if (venta == null || venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
             return false;
         }
-        String sql = "SELECT stock_actual FROM libros WHERE isbn = ?";
+        String sql = "{call sp_validar_stock_libro(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
+             CallableStatement call = conexion.prepareCall(sql)) {
             for (DetalleVenta d : venta.getDetalles()) {
-                ps.setString(1, d.getIsbnLibro());
-                try (ResultSet rs = ps.executeQuery()) {
+                call.setString(1, d.getIsbnLibro());
+                try (ResultSet rs = call.executeQuery()) {
                     if (rs.next()) {
                         int stockActual = rs.getInt("stock_actual");
                         if (stockActual < d.getCantidad()) {
@@ -142,8 +142,27 @@ public class VentaDAOImpl implements VentaDAO {
             }
             return true;
         } catch (SQLException e) {
-            System.err.println("Error al validar stock de venta: " + e.getMessage());
-            return false;
+            String sqlFallback = "SELECT stock_actual FROM libros WHERE isbn = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                for (DetalleVenta d : venta.getDetalles()) {
+                    ps.setString(1, d.getIsbnLibro());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            int stockActual = rs.getInt("stock_actual");
+                            if (stockActual < d.getCantidad()) {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            } catch (SQLException e2) {
+                System.err.println("Error al validar stock de venta: " + e2.getMessage());
+                return false;
+            }
         }
     }
 
@@ -281,21 +300,32 @@ public class VentaDAOImpl implements VentaDAO {
     @Override
     public List<Venta> obtenerVentasDelDiaPorUsuario(int idUsuario) {
         List<Venta> ventas = new ArrayList<>();
-        String sqlFallback = "SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente "
-                           + "FROM ventas v "
-                           + "LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario "
-                           + "LEFT JOIN clientes c ON v.cui_cliente = c.cui "
-                           + "WHERE DATE(v.fecha_venta) = CURDATE() AND v.id_usuario = ? ORDER BY v.id_venta DESC";
+        String sqlProc = "{call sp_obtener_ventas_del_dia_por_usuario(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
-            ps.setInt(1, idUsuario);
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sqlProc)) {
+            call.setInt(1, idUsuario);
+            try (ResultSet rs = call.executeQuery()) {
                 while (rs.next()) {
                     ventas.add(mapearVenta(rs));
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener ventas del día por usuario: " + e.getMessage());
+            String sqlFallback = "SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente "
+                               + "FROM ventas v "
+                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario "
+                               + "LEFT JOIN clientes c ON v.cui_cliente = c.cui "
+                               + "WHERE DATE(v.fecha_venta) = CURDATE() AND v.id_usuario = ? ORDER BY v.id_venta DESC";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setInt(1, idUsuario);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        ventas.add(mapearVenta(rs));
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al obtener ventas del día por usuario: " + e2.getMessage());
+            }
         }
         return ventas;
     }
