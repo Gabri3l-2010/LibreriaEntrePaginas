@@ -1,7 +1,10 @@
 package org.paginalibre8.controller;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,15 +13,32 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.paginalibre8.dao.impl.VentaDAO;
+import org.paginalibre8.dao.impl.VentaDAOImpl;
 import org.paginalibre8.model.Usuario;
+import org.paginalibre8.model.Venta;
 import org.paginalibre8.servicio.SesionUsuario;
 import org.paginalibre8.system.Main;
 
 public class DashboardCajeroController implements Initializable, DashboardController {
 
     @FXML private Label lblUsuario;
+    @FXML private Label lblTotalVentasDia;
+    @FXML private Label lblCantVentasDia;
+
+    @FXML private TableView<Venta> tblVentasDia;
+    @FXML private TableColumn<Venta, Integer> colIdVenta;
+    @FXML private TableColumn<Venta, String> colFechaVenta;
+    @FXML private TableColumn<Venta, String> colNitCliente;
+    @FXML private TableColumn<Venta, Double> colTotalVenta;
+
+    private final VentaDAO ventaDAO = new VentaDAOImpl();
+    private final ObservableList<Venta> ventasDiaList = FXCollections.observableArrayList();
     private Usuario usuarioActual;
 
     @Override
@@ -33,6 +53,8 @@ public class DashboardCajeroController implements Initializable, DashboardContro
                 lblUsuario.setText("Cajero: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
+        configurarTablaVentas();
+        cargarVentasDelDia();
     }
 
     @Override
@@ -41,8 +63,60 @@ public class DashboardCajeroController implements Initializable, DashboardContro
         if (lblUsuario != null && usuario != null) {
             lblUsuario.setText("Cajero: " + usuario.getUsername());
         }
+        cargarVentasDelDia();
     }
 
+    /**
+     * T2.29 - Tabla / Resumen de Ventas del Día
+     */
+    private void configurarTablaVentas() {
+        if (tblVentasDia == null) return;
+        colIdVenta.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colFechaVenta.setCellValueFactory(new PropertyValueFactory<>("fecha"));
+        colNitCliente.setCellValueFactory(new PropertyValueFactory<>("nitCliente"));
+        colTotalVenta.setCellValueFactory(new PropertyValueFactory<>("total"));
+
+        tblVentasDia.setItems(ventasDiaList);
+    }
+
+    /**
+     * T2.27 & T2.29 - Carga y cálculo de resumen de ventas del día
+     */
+    public void cargarVentasDelDia() {
+        ventasDiaList.clear();
+        List<Venta> ventas;
+        if (usuarioActual != null && usuarioActual.getId() > 0) {
+            ventas = ventaDAO.obtenerVentasDelDiaPorUsuario(usuarioActual.getId());
+        } else {
+            ventas = ventaDAO.obtenerVentasDelDia();
+        }
+
+        if (ventas != null) {
+            ventasDiaList.addAll(ventas);
+        }
+
+        double totalSuma = 0.0;
+        for (Venta v : ventasDiaList) {
+            totalSuma += v.getTotal();
+        }
+
+        if (lblTotalVentasDia != null) {
+            lblTotalVentasDia.setText(String.format("Q %.2f", totalSuma));
+        }
+
+        if (lblCantVentasDia != null) {
+            lblCantVentasDia.setText(String.valueOf(ventasDiaList.size()));
+        }
+    }
+
+    @FXML
+    private void handleRefrescarVentas(ActionEvent event) {
+        cargarVentasDelDia();
+    }
+
+    /**
+     * T2.30 - Integración con el Punto de Venta
+     */
     @FXML
     private void handleVentas(ActionEvent event) {
         if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
@@ -55,7 +129,8 @@ public class DashboardCajeroController implements Initializable, DashboardContro
             Stage stage = new Stage();
             stage.setTitle("Punto de Venta - Librería Entre Páginas");
             stage.setScene(new Scene(root, 940, 660));
-            stage.show();
+            stage.showAndWait();
+            cargarVentasDelDia();
         } catch (Exception e) {
             mostrarError("Error al abrir el Punto de Venta:\n" + e.getMessage());
         }
