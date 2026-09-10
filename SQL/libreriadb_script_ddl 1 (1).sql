@@ -1,612 +1,559 @@
-drop database if exists libreriadb_in4cm;
-create database if not exists libreriadb_in4cm;
-use libreriadb_in4cm;
-
-create table categorias(
-	id_categoria int primary key auto_increment,
-    nombre_categoria varchar(100)
-);
-
-
--- editoriales
-create table editoriales (
-	nit varchar(20) primary key,
-    nombre_editorial varchar(100) not null,
-    telefono_editorial varchar(15),
-    direccion_editoria varchar(100)    
-);
- 
--- autores
-create table autores(
-	id_autor int primary key auto_increment,
-    nombre_autor varchar(100) not null,
-    apellido_autor varchar(100) not null,
-    nacionalidad varchar(100),
-    biografia text
-);
- 
--- cliente
-create table clientes(
-	cui bigint primary key,
-    nombre_cliente varchar(100),
-    apellido_cliente varchar(100),
-    correo_electronico varchar(100)
-);
- 
--- libros
-create table libros(
-	isbn varchar(20) primary key,
-    titulo varchar(100) not null,
-    fecha_publicacion date,
-    precio decimal(8,2) not null,
-    id_categoria int,
-    nit_editorial varchar(20)
-);
- 
--- autores_libro
-create table autores_libro(
-	id_autor_libro int auto_increment primary key,
-    id_autor int,
-    isbn varchar(20)
-);
- 
--- compras
-create table compras(
-	no_compra int primary key auto_increment,
-    fecha_compra timestamp default current_timestamp,
-    total_compra decimal(8,2),
-    cui_cliente bigint
-);
--- detalle_compra
-create table detalle_compra(
-	id_detalle_compra int primary key auto_increment,
-    no_compra int,
-    isbn varchar(20)
-);
--- agregamos la relaciones a la tablas, entidades.
-alter table autores_libro
-add constraint fk_a_autor foreign key (id_autor) references autores(id_autor) on delete cascade,
-add constraint fk_a_libro foreign key (isbn) references libros(isbn) on delete cascade;
- 
-alter table compras
-add constraint fk_a_cliente foreign key (cui_cliente) references clientes (cui) on delete cascade;
-
- 
-alter table detalle_compra
-add constraint fk_a_compra foreign key (no_compra) references compras(no_compra) on delete cascade,
-add constraint fk_a_libros foreign key (isbn) references libros(isbn) on delete cascade;
- 
-alter table libros
-add constraint fk_a_categorias foreign key (id_categoria) references categorias(id_categoria) on delete cascade,
-add constraint fk_a_editoriales foreign key (nit_editorial) references editoriales(nit) on delete cascade;
-
-use libreriadb_in4cm;
+DROP DATABASE IF EXISTS libreriadb_in4cm;
+CREATE DATABASE IF NOT EXISTS libreriadb_in4cm;
+USE libreriadb_in4cm;
 
 -- =============================================================================
--- 1. crud: categorias
+-- 1. CREACIÓN DE TABLAS (DDL)
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarcategoria(
-    in _nombre_categoria varchar(100)
-)
-begin
-    insert into categorias(nombre_categoria) 
-    values (_nombre_categoria);
-end $$
+CREATE TABLE usuarios (
+    id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol ENUM('admin', 'bodega', 'cajero') NOT NULL,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    correo VARCHAR(100),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
-create procedure sp_listarcategorias()
-begin
-    select id_categoria, nombre_categoria from categorias;
-end $$
+CREATE TABLE proveedores (
+    id_proveedor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_proveedor VARCHAR(100) NOT NULL,
+    contacto VARCHAR(100),
+    telefono VARCHAR(15),
+    direccion VARCHAR(150)
+);
 
-create procedure sp_buscarcategoria(
-    in _id_categoria int
-)
-begin
-    select id_categoria, nombre_categoria 
-    from categorias 
-    where id_categoria = _id_categoria;
-end $$
+CREATE TABLE categorias (
+    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_categoria VARCHAR(100)
+);
 
-create procedure sp_actualizarcategoria(
-    in _id_categoria int,
-    in _nombre_categoria varchar(100)
-)
-begin
-    update categorias 
-    set nombre_categoria = _nombre_categoria 
-    where id_categoria = _id_categoria;
-end $$
+CREATE TABLE editoriales (
+    nit VARCHAR(20) PRIMARY KEY,
+    nombre_editorial VARCHAR(100) NOT NULL,
+    telefono_editorial VARCHAR(15),
+    direccion_editorial VARCHAR(100)
+);
 
-create procedure sp_eliminarcategoria(
-    in _id_categoria int
-)
-begin
-    delete from categorias where id_categoria = _id_categoria;
-end $$
+CREATE TABLE autores (
+    id_autor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_autor VARCHAR(100) NOT NULL,
+    apellido_autor VARCHAR(100) NOT NULL,
+    nacionalidad VARCHAR(100),
+    biografia TEXT
+);
 
-delimiter ;
+CREATE TABLE clientes (
+    cui BIGINT PRIMARY KEY,
+    nombre_cliente VARCHAR(100),
+    apellido_cliente VARCHAR(100),
+    correo_electronico VARCHAR(100)
+);
+
+CREATE TABLE libros (
+    isbn VARCHAR(20) PRIMARY KEY,
+    titulo VARCHAR(100) NOT NULL,
+    fecha_publicacion DATE,
+    precio DECIMAL(10,2) NOT NULL,
+    id_categoria INT,
+    nit_editorial VARCHAR(20),
+    stock_actual INT NOT NULL DEFAULT 50,
+    stock_minimo INT NOT NULL DEFAULT 5,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE autores_libro (
+    id_autor_libro INT AUTO_INCREMENT PRIMARY KEY,
+    id_autor INT,
+    isbn VARCHAR(20)
+);
+
+CREATE TABLE ventas (
+    id_venta INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    subtotal DECIMAL(10,2) NOT NULL,
+    descuento DECIMAL(10,2) DEFAULT 0.00,
+    total DECIMAL(10,2) NOT NULL,
+    estado ENUM('COMPLETADA', 'ANULADA', 'DEVUELTA') DEFAULT 'COMPLETADA',
+    cui_cliente BIGINT,
+    id_usuario INT NOT NULL,
+    usuario_autoriza_descuento INT NULL,
+    fecha_anulacion TIMESTAMP NULL,
+    usuario_anulacion INT NULL,
+    motivo_anulacion VARCHAR(255) NULL
+);
+
+CREATE TABLE detalle_venta (
+    id_detalle INT PRIMARY KEY AUTO_INCREMENT,
+    id_venta INT,
+    isbn VARCHAR(20),
+    cantidad INT NOT NULL DEFAULT 1,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE movimientos_inventario (
+    id_movimiento INT PRIMARY KEY AUTO_INCREMENT,
+    isbn VARCHAR(20),
+    tipo_movimiento ENUM('INGRESO', 'VENTA', 'MERMA', 'TRASLADO', 'DEVOLUCION', 'AJUSTE') NOT NULL,
+    cantidad INT NOT NULL,
+    fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT,
+    observacion VARCHAR(255)
+);
 
 -- =============================================================================
--- 2. crud: editoriales
+-- 2. LLAVES FORÁNEAS (RELACIONES)
 -- =============================================================================
-delimiter $$
+ALTER TABLE autores_libro
+ADD CONSTRAINT fk_al_autor FOREIGN KEY (id_autor) REFERENCES autores(id_autor) ON DELETE CASCADE,
+ADD CONSTRAINT fk_al_libro FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE;
 
-create procedure sp_insertareditorial(
-    in _nit varchar(20),
-    in _nombre_editorial varchar(100),
-    in _telefono_editorial varchar(15),
-    in _direccion_editoria varchar(100)
+ALTER TABLE ventas
+ADD CONSTRAINT fk_v_cliente FOREIGN KEY (cui_cliente) REFERENCES clientes(cui) ON DELETE CASCADE,
+ADD CONSTRAINT fk_v_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+ADD CONSTRAINT fk_v_autoriza FOREIGN KEY (usuario_autoriza_descuento) REFERENCES usuarios(id_usuario) ON DELETE CASCADE;
+
+ALTER TABLE detalle_venta
+ADD CONSTRAINT fk_dv_venta FOREIGN KEY (id_venta) REFERENCES ventas(id_venta) ON DELETE CASCADE,
+ADD CONSTRAINT fk_dv_libros FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE;
+
+ALTER TABLE libros
+ADD CONSTRAINT fk_l_categorias FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE,
+ADD CONSTRAINT fk_l_editoriales FOREIGN KEY (nit_editorial) REFERENCES editoriales(nit) ON DELETE CASCADE;
+
+ALTER TABLE movimientos_inventario
+ADD CONSTRAINT fk_mi_libro FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE,
+ADD CONSTRAINT fk_mi_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE;
+
+
+-- =============================================================================
+-- 3. PROCEDIMIENTOS ALMACENADOS (STORED PROCEDURES)
+-- =============================================================================
+DELIMITER $$
+
+-- PROCEDIMIENTOS DE USUARIOS
+DROP PROCEDURE IF EXISTS sp_registrar_usuario $$
+CREATE PROCEDURE sp_registrar_usuario(
+    IN _username VARCHAR(50), 
+    IN _password_hash VARCHAR(255), 
+    IN _rol VARCHAR(20),
+    IN _nombre VARCHAR(100),
+    IN _apellido VARCHAR(100),
+    IN _correo VARCHAR(100)
 )
-begin
-    insert into editoriales(nit, nombre_editorial, telefono_editorial, direccion_editoria) 
-    values (_nit, _nombre_editorial, _telefono_editorial, _direccion_editoria);
-end $$
+BEGIN
+    INSERT INTO usuarios (username, password_hash, rol, nombre, apellido, correo) 
+    VALUES (_username, _password_hash, LOWER(_rol), _nombre, _apellido, _correo)
+    ON DUPLICATE KEY UPDATE 
+        password_hash = _password_hash,
+        rol = LOWER(_rol),
+        nombre = _nombre,
+        apellido = _apellido,
+        correo = _correo;
+END $$
 
-create procedure sp_listareditoriales()
-begin
-    select nit, nombre_editorial, telefono_editorial, direccion_editoria from editoriales;
-end $$
-
-create procedure sp_buscareditorial(
-    in _nit varchar(20)
+DROP PROCEDURE IF EXISTS sp_iniciar_sesion $$
+CREATE PROCEDURE sp_iniciar_sesion(
+    IN _username VARCHAR(50), 
+    IN _password_hash VARCHAR(255)
 )
-begin
-    select nit, nombre_editorial, telefono_editorial, direccion_editoria 
-    from editoriales 
-    where nit = _nit;
-end $$
+BEGIN
+    SELECT id_usuario AS id, id_usuario, username, password_hash, rol, nombre, apellido, correo, activo 
+    FROM usuarios 
+    WHERE LOWER(username) = LOWER(_username) 
+      AND password_hash = _password_hash 
+      AND activo = TRUE 
+    LIMIT 1;
+END $$
 
-create procedure sp_actualizareditorial(
-    in _nit varchar(20),
-    in _nombre_editorial varchar(100),
-    in _telefono_editorial varchar(15),
-    in _direccion_editoria varchar(100)
+DROP PROCEDURE IF EXISTS sp_buscar_usuario $$
+CREATE PROCEDURE sp_buscar_usuario(
+    IN _username VARCHAR(50)
 )
-begin
-    update editoriales 
-    set nombre_editorial = _nombre_editorial, 
+BEGIN
+    SELECT id_usuario AS id, id_usuario, username, rol, nombre, apellido, correo, activo 
+    FROM usuarios 
+    WHERE username = _username;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_cambiar_password $$
+CREATE PROCEDURE sp_cambiar_password(
+    IN _id_usuario INT,
+    IN _nueva_password_hash VARCHAR(255)
+)
+BEGIN
+    UPDATE usuarios 
+    SET password_hash = _nueva_password_hash 
+    WHERE id_usuario = _id_usuario;
+END $$
+
+-- PROCEDIMIENTOS DE CATEGORIAS
+DROP PROCEDURE IF EXISTS sp_insertarcategoria $$
+CREATE PROCEDURE sp_insertarcategoria(IN _nombre_categoria VARCHAR(100))
+BEGIN
+    INSERT INTO categorias(nombre_categoria) VALUES (_nombre_categoria);
+END $$
+
+DROP PROCEDURE IF EXISTS sp_listarcategorias $$
+CREATE PROCEDURE sp_listarcategorias()
+BEGIN
+    SELECT id_categoria, nombre_categoria FROM categorias;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_buscarcategoria $$
+CREATE PROCEDURE sp_buscarcategoria(IN _id_categoria INT)
+BEGIN
+    SELECT id_categoria, nombre_categoria FROM categorias WHERE id_categoria = _id_categoria;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_actualizarcategoria $$
+CREATE PROCEDURE sp_actualizarcategoria(IN _id_categoria INT, IN _nombre_categoria VARCHAR(100))
+BEGIN
+    UPDATE categorias SET nombre_categoria = _nombre_categoria WHERE id_categoria = _id_categoria;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_eliminarcategoria $$
+CREATE PROCEDURE sp_eliminarcategoria(IN _id_categoria INT)
+BEGIN
+    DELETE FROM categorias WHERE id_categoria = _id_categoria;
+END $$
+
+-- PROCEDIMIENTOS DE EDITORIALES
+DROP PROCEDURE IF EXISTS sp_insertareditorial $$
+CREATE PROCEDURE sp_insertareditorial(
+    IN _nit VARCHAR(20),
+    IN _nombre_editorial VARCHAR(100),
+    IN _telefono_editorial VARCHAR(15),
+    IN _direccion_editorial VARCHAR(100)
+)
+BEGIN
+    INSERT INTO editoriales(nit, nombre_editorial, telefono_editorial, direccion_editorial) 
+    VALUES (_nit, _nombre_editorial, _telefono_editorial, _direccion_editorial);
+END $$
+
+DROP PROCEDURE IF EXISTS sp_listareditoriales $$
+CREATE PROCEDURE sp_listareditoriales()
+BEGIN
+    SELECT nit, nombre_editorial, telefono_editorial, direccion_editorial FROM editoriales;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_buscareditorial $$
+CREATE PROCEDURE sp_buscareditorial(IN _nit VARCHAR(20))
+BEGIN
+    SELECT nit, nombre_editorial, telefono_editorial, direccion_editorial FROM editoriales WHERE nit = _nit;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_actualizareditorial $$
+CREATE PROCEDURE sp_actualizareditorial(
+    IN _nit VARCHAR(20),
+    IN _nombre_editorial VARCHAR(100),
+    IN _telefono_editorial VARCHAR(15),
+    IN _direccion_editorial VARCHAR(100)
+)
+BEGIN
+    UPDATE editoriales 
+    SET nombre_editorial = _nombre_editorial, 
         telefono_editorial = _telefono_editorial, 
-        direccion_editoria = _direccion_editoria 
-    where nit = _nit;
-end $$
+        direccion_editorial = _direccion_editorial 
+    WHERE nit = _nit;
+END $$
 
-create procedure sp_eliminareditorial(
-    in _nit varchar(20)
+DROP PROCEDURE IF EXISTS sp_eliminareditorial $$
+CREATE PROCEDURE sp_eliminareditorial(IN _nit VARCHAR(20))
+BEGIN
+    DELETE FROM editoriales WHERE nit = _nit;
+END $$
+
+-- PROCEDIMIENTOS DE AUTORES
+DROP PROCEDURE IF EXISTS sp_insertarautor $$
+CREATE PROCEDURE sp_insertarautor(
+    IN _nombre_autor VARCHAR(100),
+    IN _apellido_autor VARCHAR(100),
+    IN _nacionalidad VARCHAR(100),
+    IN _biografia TEXT
 )
-begin
-    delete from editoriales where nit = _nit;
-end $$
+BEGIN
+    INSERT INTO autores(nombre_autor, apellido_autor, nacionalidad, biografia) 
+    VALUES (_nombre_autor, _apellido_autor, _nacionalidad, _biografia);
+END $$
 
-delimiter ;
+DROP PROCEDURE IF EXISTS sp_listarautores $$
+CREATE PROCEDURE sp_listarautores()
+BEGIN
+    SELECT id_autor, nombre_autor, apellido_autor, nacionalidad, biografia FROM autores;
+END $$
 
--- =============================================================================
--- 3. crud: autores
--- =============================================================================
-delimiter $$
+DROP PROCEDURE IF EXISTS sp_buscarautor $$
+CREATE PROCEDURE sp_buscarautor(IN _id_autor INT)
+BEGIN
+    SELECT id_autor, nombre_autor, apellido_autor, nacionalidad, biografia FROM autores WHERE id_autor = _id_autor;
+END $$
 
-create procedure sp_insertarautor(
-    in _nombre_autor varchar(100),
-    in _apellido_autor varchar(100),
-    in _nacionalidad varchar(100),
-    in _biografia text
+DROP PROCEDURE IF EXISTS sp_actualizarautor $$
+CREATE PROCEDURE sp_actualizarautor(
+    IN _id_autor INT,
+    IN _nombre_autor VARCHAR(100),
+    IN _apellido_autor VARCHAR(100),
+    IN _nacionalidad VARCHAR(100),
+    IN _biografia TEXT
 )
-begin
-    insert into autores(nombre_autor, apellido_autor, nacionalidad, biografia) 
-    values (_nombre_autor, _apellido_autor, _nacionalidad, _biografia);
-end $$
-
-create procedure sp_listarautores()
-begin
-    select id_autor, nombre_autor, apellido_autor, nacionalidad, biografia from autores;
-end $$
-
-create procedure sp_buscarautor(
-    in _id_autor int
-)
-begin
-    select id_autor, nombre_autor, apellido_autor, nacionalidad, biografia 
-    from autores 
-    where id_autor = _id_autor;
-end $$
-
-create procedure sp_actualizarautor(
-    in _id_autor int,
-    in _nombre_autor varchar(100),
-    in _apellido_autor varchar(100),
-    in _nacionalidad varchar(100),
-    in _biografia text
-)
-begin
-    update autores 
-    set nombre_autor = _nombre_autor, 
+BEGIN
+    UPDATE autores 
+    SET nombre_autor = _nombre_autor, 
         apellido_autor = _apellido_autor, 
         nacionalidad = _nacionalidad, 
         biografia = _biografia 
-    where id_autor = _id_autor;
-end $$
+    WHERE id_autor = _id_autor;
+END $$
 
-create procedure sp_eliminarautor(
-    in _id_autor int
+DROP PROCEDURE IF EXISTS sp_eliminarautor $$
+CREATE PROCEDURE sp_eliminarautor(IN _id_autor INT)
+BEGIN
+    DELETE FROM autores WHERE id_autor = _id_autor;
+END $$
+
+-- PROCEDIMIENTOS DE CLIENTES
+DROP PROCEDURE IF EXISTS sp_insertarcliente $$
+CREATE PROCEDURE sp_insertarcliente(
+    IN _cui BIGINT,
+    IN _nombre_cliente VARCHAR(100),
+    IN _apellido_cliente VARCHAR(100),
+    IN _correo_electronico VARCHAR(100)
 )
-begin
-    delete from autores where id_autor = _id_autor;
-end $$
+BEGIN
+    INSERT INTO clientes(cui, nombre_cliente, apellido_cliente, correo_electronico) 
+    VALUES (_cui, _nombre_cliente, _apellido_cliente, _correo_electronico);
+END $$
 
-delimiter ;
+DROP PROCEDURE IF EXISTS sp_listarclientes $$
+CREATE PROCEDURE sp_listarclientes()
+BEGIN
+    SELECT cui, nombre_cliente, apellido_cliente, correo_electronico FROM clientes;
+END $$
 
--- =============================================================================
--- 4. crud: clientes
--- =============================================================================
-delimiter $$
+DROP PROCEDURE IF EXISTS sp_buscarcliente $$
+CREATE PROCEDURE sp_buscarcliente(IN _cui BIGINT)
+BEGIN
+    SELECT cui, nombre_cliente, apellido_cliente, correo_electronico FROM clientes WHERE cui = _cui;
+END $$
 
-create procedure sp_insertarcliente(
-    in _cui bigint,
-    in _nombre_cliente varchar(100),
-    in _apellido_cliente varchar(100),
-    in _correo_electronico varchar(100)
+DROP PROCEDURE IF EXISTS sp_actualizarcliente $$
+CREATE PROCEDURE sp_actualizarcliente(
+    IN _cui BIGINT,
+    IN _nombre_cliente VARCHAR(100),
+    IN _apellido_cliente VARCHAR(100),
+    IN _correo_electronico VARCHAR(100)
 )
-begin
-    insert into clientes(cui, nombre_cliente, apellido_cliente, correo_electronico) 
-    values (_cui, _nombre_cliente, _apellido_cliente, _correo_electronico);
-end $$
-
-create procedure sp_listarclientes()
-begin
-    select cui, nombre_cliente, apellido_cliente, correo_electronico from clientes;
-end $$
-
-create procedure sp_buscarcliente(
-    in _cui bigint
-)
-begin
-    select cui, nombre_cliente, apellido_cliente, correo_electronico 
-    from clientes 
-    where cui = _cui;
-end $$
-
-create procedure sp_actualizarcliente(
-    in _cui bigint,
-    in _nombre_cliente varchar(100),
-    in _apellido_cliente varchar(100),
-    in _correo_electronico varchar(100)
-)
-begin
-    update clientes 
-    set nombre_cliente = _nombre_cliente, 
+BEGIN
+    UPDATE clientes 
+    SET nombre_cliente = _nombre_cliente, 
         apellido_cliente = _apellido_cliente, 
         correo_electronico = _correo_electronico 
-    where cui = _cui;
-end $$
+    WHERE cui = _cui;
+END $$
 
-create procedure sp_eliminarcliente(
-    in _cui bigint
+DROP PROCEDURE IF EXISTS sp_eliminarcliente $$
+CREATE PROCEDURE sp_eliminarcliente(IN _cui BIGINT)
+BEGIN
+    DELETE FROM clientes WHERE cui = _cui;
+END $$
+
+-- PROCEDIMIENTOS DE LIBROS
+DROP PROCEDURE IF EXISTS sp_insertarlibro $$
+CREATE PROCEDURE sp_insertarlibro(
+    IN _isbn VARCHAR(20),
+    IN _titulo VARCHAR(100),
+    IN _fecha_publicacion DATE,
+    IN _precio DECIMAL(10,2),
+    IN _id_categoria INT,
+    IN _nit_editorial VARCHAR(20)
 )
-begin
-    delete from clientes where cui = _cui;
-end $$
+BEGIN
+    INSERT INTO libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual) 
+    VALUES (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial, 50);
+END $$
 
-delimiter ;
+DROP PROCEDURE IF EXISTS sp_listarlibros $$
+CREATE PROCEDURE sp_listarlibros()
+BEGIN
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial 
+    FROM libros l
+    LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
+    LEFT JOIN editoriales e ON l.nit_editorial = e.nit;
+END $$
 
--- =============================================================================
--- 5. crud: libros
--- =============================================================================
-delimiter $$
+DROP PROCEDURE IF EXISTS sp_buscarlibro $$
+CREATE PROCEDURE sp_buscarlibro(IN _isbn VARCHAR(20))
+BEGIN
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial 
+    FROM libros l
+    LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
+    LEFT JOIN editoriales e ON l.nit_editorial = e.nit
+    WHERE l.isbn = _isbn;
+END $$
 
-create procedure sp_insertarlibro(
-    in _isbn varchar(20),
-    in _titulo varchar(100),
-    in _fecha_publicacion date,
-    in _precio decimal(8,2),
-    in _id_categoria int,
-    in _nit_editorial varchar(20)
+DROP PROCEDURE IF EXISTS sp_actualizarlibro $$
+CREATE PROCEDURE sp_actualizarlibro(
+    IN _isbn VARCHAR(20),
+    IN _titulo VARCHAR(100),
+    IN _fecha_publicacion DATE,
+    IN _precio DECIMAL(10,2),
+    IN _id_categoria INT,
+    IN _nit_editorial VARCHAR(20)
 )
-begin
-    insert into libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial) 
-    values (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial);
-end $$
-
-create procedure sp_listarlibros()
-begin
-    select isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial from libros;
-end $$
-
-create procedure sp_buscarlibro(
-    in _isbn varchar(20)
-)
-begin
-    select isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial 
-    from libros 
-    where isbn = _isbn;
-end $$
-
-create procedure sp_actualizarlibro(
-    in _isbn varchar(20),
-    in _titulo varchar(100),
-    in _fecha_publicacion date,
-    in _precio decimal(8,2),
-    in _id_categoria int,
-    in _nit_editorial varchar(20)
-)
-begin
-    update libros 
-    set titulo = _titulo, 
+BEGIN
+    UPDATE libros 
+    SET titulo = _titulo, 
         fecha_publicacion = _fecha_publicacion, 
         precio = _precio, 
         id_categoria = _id_categoria, 
         nit_editorial = _nit_editorial 
-    where isbn = _isbn;
-end $$
+    WHERE isbn = _isbn;
+END $$
 
-create procedure sp_eliminarlibro(
-    in _isbn varchar(20)
+DROP PROCEDURE IF EXISTS sp_eliminarlibro $$
+CREATE PROCEDURE sp_eliminarlibro(IN _isbn VARCHAR(20))
+BEGIN
+    DELETE FROM libros WHERE isbn = _isbn;
+END $$
+
+-- PROCEDIMIENTOS DE AUTORES_LIBRO
+DROP PROCEDURE IF EXISTS sp_insertarautorlibro $$
+CREATE PROCEDURE sp_insertarautorlibro(
+    IN _id_autor INT,
+    IN _isbn VARCHAR(20)
 )
-begin
-    delete from libros where isbn = _isbn;
-end $$
+BEGIN
+    INSERT INTO autores_libro(id_autor, isbn) VALUES (_id_autor, _isbn);
+END $$
 
-delimiter ;
+-- PROCEDIMIENTOS DE VENTAS Y REPORTES
+DROP PROCEDURE IF EXISTS sp_insertarventa $$
+CREATE PROCEDURE sp_insertarventa(
+    IN _total DECIMAL(10,2),
+    IN _cui_cliente BIGINT
+)
+BEGIN
+    INSERT INTO ventas (subtotal, total, cui_cliente, id_usuario, estado) 
+    VALUES (_total, _total, _cui_cliente, 1, 'COMPLETADA');
+END $$
+
+DROP PROCEDURE IF EXISTS sp_insertardetalleventa $$
+CREATE PROCEDURE sp_insertardetalleventa(
+    IN _id_venta INT,
+    IN _isbn VARCHAR(20)
+)
+BEGIN
+    DECLARE _precio_unitario DECIMAL(10,2);
+    SELECT precio INTO _precio_unitario FROM libros WHERE isbn = _isbn;
+    
+    INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) 
+    VALUES (_id_venta, _isbn, 1, _precio_unitario, _precio_unitario);
+END $$
+
+DROP PROCEDURE IF EXISTS sp_obtener_ventas_del_dia $$
+CREATE PROCEDURE sp_obtener_ventas_del_dia()
+BEGIN
+    SELECT v.id_venta AS id, v.id_venta, v.fecha_venta AS fecha, v.subtotal, v.descuento, v.total, v.estado, v.cui_cliente AS nit_cliente, v.id_usuario,
+           u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente
+    FROM ventas v
+    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+    LEFT JOIN clientes c ON v.cui_cliente = c.cui
+    WHERE DATE(v.fecha_venta) = CURDATE()
+    ORDER BY v.id_venta DESC;
+END $$
+
+DELIMITER ;
 
 -- =============================================================================
--- 6. crud: autores_libro (tabla intermedia)
--- =============================================================================
-delimiter $$
-
-create procedure sp_insertarautorlibro(
-    in _id_autor int,
-    in _isbn varchar(20)
-)
-begin
-    insert into autores_libro(id_autor, isbn) 
-    values (_id_autor, _isbn);
-end $$
-
-create procedure sp_listarautoreslibro()
-begin
-    select id_autor_libro, id_autor, isbn from autores_libro;
-end $$
-
-create procedure sp_buscarautorlibro(
-    in _id_autor_libro int
-)
-begin
-    select id_autor_libro, id_autor, isbn 
-    from autores_libro 
-    where id_autor_libro = _id_autor_libro;
-end $$
-
-create procedure sp_actualizarautorlibro(
-    in _id_autor_libro int,
-    in _id_autor int,
-    in _isbn varchar(20)
-)
-begin
-    update autores_libro 
-    set id_autor = _id_autor, 
-        isbn = _isbn 
-    where id_autor_libro = _id_autor_libro;
-end $$
-
-create procedure sp_eliminarautorlibro(
-    in _id_autor_libro int
-)
-begin
-    delete from autores_libro where id_autor_libro = _id_autor_libro;
-end $$
-
-delimiter ;
-
--- =============================================================================
--- 7. crud: compras
--- =============================================================================
-delimiter $$
-
-create procedure sp_insertarcompra(
-    in _total_compra decimal(8,2),
-    in _cui_cliente bigint
-)
-begin
-    -- se omite fecha_compra para que tome el current_timestamp por defecto
-    insert into compras(total_compra, cui_cliente) 
-    values (_total_compra, _cui_cliente);
-end $$
-
-create procedure sp_listarcompras()
-begin
-    select no_compra, fecha_compra, total_compra, cui_cliente from compras;
-end $$
-
-create procedure sp_buscarcompra(
-    in _no_compra int
-)
-begin
-    select no_compra, fecha_compra, total_compra, cui_cliente 
-    from compras 
-    where no_compra = _no_compra;
-end $$
-
-create procedure sp_actualizarcompra(
-    in _no_compra int,
-    in _total_compra decimal(8,2),
-    in _cui_cliente bigint
-)
-begin
-    update compras 
-    set total_compra = _total_compra, 
-        cui_cliente = _cui_cliente 
-    where no_compra = _no_compra;
-end $$
-
-create procedure sp_eliminarcompra(
-    in _no_compra int
-)
-begin
-    delete from compras where no_compra = _no_compra;
-end $$
-
-delimiter ;
-
--- =============================================================================
--- 8. crud: detalle_compra
--- =============================================================================
-delimiter $$
-
-create procedure sp_insertardetallecompra(
-    in _no_compra int,
-    in _isbn varchar(20)
-)
-begin
-    insert into detalle_compra(no_compra, isbn) 
-    values (_no_compra, _isbn);
-end $$
-
-create procedure sp_listardetallecompra()
-begin
-    select id_detalle_compra, no_compra, isbn from detalle_compra;
-end $$
-
-create procedure sp_buscardetallecompra(
-    in _id_detalle_compra int
-)
-begin
-    select id_detalle_compra, no_compra, isbn 
-    from detalle_compra 
-    where id_detalle_compra = _id_detalle_compra;
-end $$
-
-create procedure sp_actualizardetallecompra(
-    in _id_detalle_compra int,
-    in _no_compra int,
-    in _isbn varchar(20)
-)
-begin
-    update detalle_compra 
-    set no_compra = _no_compra, 
-        isbn = _isbn 
-    where id_detalle_compra = _id_detalle_compra;
-end $$
-
-create procedure sp_eliminardetallecompra(
-    in _id_detalle_compra int
-)
-begin
-    delete from detalle_compra where id_detalle_compra = _id_detalle_compra;
-end $$
-
-delimiter ;
-
-
-use libreriadb_in4cm;
-
--- =============================================================================
--- 1. vistas de listado simple (tablas sin llaves foráneas)
+-- 4. VISTAS (VIEWS)
 -- =============================================================================
 
--- vista para listar categorías
-create or replace view vw_lista_categorias as
-select 
-    id_categoria as 'id categoría',
-    nombre_categoria as 'categoría'
-from categorias;
+CREATE OR REPLACE VIEW vw_lista_categorias AS
+SELECT 
+    id_categoria AS 'id categoría',
+    nombre_categoria AS 'categoría'
+FROM categorias;
 
--- vista para listar editoriales
-create or replace view vw_lista_editoriales as
-select 
-    nit as 'nit editorial',
-    nombre_editorial as 'editorial',
-    telefono_editorial as 'teléfono',
-    direccion_editoria as 'dirección'
-from editoriales;
+CREATE OR REPLACE VIEW vw_lista_editoriales AS
+SELECT 
+    nit AS 'nit editorial',
+    nombre_editorial AS 'editorial',
+    telefono_editorial AS 'teléfono',
+    direccion_editorial AS 'dirección'
+FROM editoriales;
 
--- vista para listar autores
-create or replace view vw_lista_autores as
-select 
-    id_autor as 'id autor',
-    concat(nombre_autor, ' ', apellido_autor) as 'autor',
-    nacionalidad as 'nacionalidad',
-    biografia as 'biografía'
-from autores;
+CREATE OR REPLACE VIEW vw_lista_autores AS
+SELECT 
+    id_autor AS 'id autor',
+    CONCAT(nombre_autor, ' ', apellido_autor) AS 'autor',
+    nacionalidad AS 'nacionalidad',
+    biografia AS 'biografía'
+FROM autores;
 
--- vista para listar clientes
-create or replace view vw_lista_clientes as
-select 
-    cui as 'cui cliente',
-    concat(nombre_cliente, ' ', apellido_cliente) as 'cliente',
-    correo_electronico as 'correo electrónico'
-from clientes;
+CREATE OR REPLACE VIEW vw_lista_clientes AS
+SELECT 
+    cui AS 'cui cliente',
+    CONCAT(nombre_cliente, ' ', apellido_cliente) AS 'cliente',
+    correo_electronico AS 'correo electrónico'
+FROM clientes;
 
+CREATE OR REPLACE VIEW vw_lista_libros AS
+SELECT 
+    l.isbn AS 'isbn',
+    l.titulo AS 'título',
+    l.fecha_publicacion AS 'fecha de publicación',
+    l.precio AS 'precio',
+    l.stock_actual AS 'stock',
+    c.nombre_categoria AS 'categoría',
+    e.nombre_editorial AS 'editorial'
+FROM libros l
+LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
+LEFT JOIN editoriales e ON l.nit_editorial = e.nit;
 
--- =============================================================================
--- 2. vistas con joins (tablas con llaves foráneas)
--- =============================================================================
+CREATE OR REPLACE VIEW vw_lista_autores_libro AS
+SELECT 
+    al.id_autor_libro AS 'id relación',
+    CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS 'autor',
+    l.titulo AS 'título del libro',
+    l.isbn AS 'isbn'
+FROM autores_libro al
+INNER JOIN autores a ON al.id_autor = a.id_autor
+INNER JOIN libros l ON al.isbn = l.isbn;
 
--- vista para listar libros (une con categorías y editoriales)
-create or replace view vw_lista_libros as
-select 
-    l.isbn as 'isbn',
-    l.titulo as 'título',
-    l.fecha_publicacion as 'fecha de publicación',
-    l.precio as 'precio',
-    c.nombre_categoria as 'categoría',
-    e.nombre_editorial as 'editorial'
-from libros l
-inner join categorias c on l.id_categoria = c.id_categoria
-inner join editoriales e on l.nit_editorial = e.nit;
+CREATE OR REPLACE VIEW vw_lista_ventas AS
+SELECT 
+    v.id_venta AS 'no. venta',
+    v.fecha_venta AS 'fecha/hora',
+    v.subtotal AS 'subtotal',
+    v.total AS 'total',
+    v.cui_cliente AS 'cui cliente',
+    CONCAT(cl.nombre_cliente, ' ', cl.apellido_cliente) AS 'cliente',
+    u.username AS 'cajero'
+FROM ventas v
+INNER JOIN clientes cl ON v.cui_cliente = cl.cui
+INNER JOIN usuarios u ON v.id_usuario = u.id_usuario;
 
--- vista para listar la relación autores-libro 
-create or replace view vw_lista_autores_libro as
-select 
-    al.id_autor_libro as 'id relación',
-    concat(a.nombre_autor, ' ', a.apellido_autor) as 'autor',
-    l.titulo as 'título del libro',
-    l.isbn as 'isbn'
-from autores_libro al
-inner join autores a on al.id_autor = a.id_autor
-inner join libros l on al.isbn = l.isbn;
-
--- vista para listar compras (une con clientes)
-create or replace view vw_lista_compras as
-select 
-    co.no_compra as 'no. compra',
-    co.fecha_compra as 'fecha/hora',
-    co.total_compra as 'total',
-    co.cui_cliente as 'cui cliente',
-    concat(cl.nombre_cliente, ' ', cl.apellido_cliente) as 'cliente'
-from compras co
-inner join clientes cl on co.cui_cliente = cl.cui;
-
--- vista para listar el detalle de las compras (une con libros)
-create or replace view vw_lista_detalle_compra as
-select 
-    dc.id_detalle_compra as 'id detalle',
-    dc.no_compra as 'no. compra',
-    l.titulo as 'libro',
-    l.isbn as 'isbn',
-    l.precio as 'precio unitario'
-from detalle_compra dc
-inner join libros l on dc.isbn = l.isbn;
-
-
--- =============================================================================
--- 3. vista para generar la factura de compras
--- =============================================================================
--- esta vista unifica los datos del cliente, el encabezado de la compra y el 
--- desglose de los libros adquiridos en una sola estructura estilo factura.
-
-create or replace view vw_factura_compras as
-select 
-    co.no_compra as 'numero_factura',
-    co.fecha_compra as 'fecha_emision',
-    cl.cui as 'cui_cliente',
-    concat(cl.nombre_cliente, ' ', cl.apellido_cliente) as 'nombre_cliente',
-    cl.correo_electronico as 'correo_cliente',
-    l.isbn as 'isbn_libro',
-    l.titulo as 'descripcion_libro',
-    l.precio as 'precio_articulo',
-    co.total_compra as 'gran_total'
-from compras co
-inner join clientes cl on co.cui_cliente = cl.cui
-inner join detalle_compra dc on co.no_compra = dc.no_compra
-inner join libros l on dc.isbn = l.isbn;
-
+CREATE OR REPLACE VIEW vw_factura_ventas AS
+SELECT 
+    v.id_venta AS 'numero_factura',
+    v.fecha_venta AS 'fecha_emision',
+    cl.cui AS 'cui_cliente',
+    CONCAT(cl.nombre_cliente, ' ', cl.apellido_cliente) AS 'nombre_cliente',
+    cl.correo_electronico AS 'correo_cliente',
+    l.isbn AS 'isbn_libro',
+    l.titulo AS 'descripcion_libro',
+    dv.cantidad AS 'cantidad',
+    dv.precio_unitario AS 'precio_articulo',
+    dv.subtotal AS 'subtotal_linea',
+    v.total AS 'gran_total'
+FROM ventas v
+INNER JOIN clientes cl ON v.cui_cliente = cl.cui
+INNER JOIN detalle_venta dv ON v.id_venta = dv.id_venta
+INNER JOIN libros l ON dv.isbn = l.isbn;

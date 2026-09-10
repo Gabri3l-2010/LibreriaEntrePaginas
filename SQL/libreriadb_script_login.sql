@@ -1,6 +1,6 @@
 -- tabla de usuarios
 create table if not exists usuarios (
-    id int auto_increment primary key,
+    id_usuario int auto_increment primary key,
     username varchar(50) not null unique,
     password_hash varchar(255) not null,
     rol varchar(20) not null,
@@ -24,7 +24,13 @@ create procedure sp_registrar_usuario(
 )
 begin
     insert into usuarios (username, password_hash, rol, nombre, apellido, correo) 
-    values (_username, _password_hash, _rol, _nombre, _apellido, _correo);
+    values (_username, _password_hash, _rol, _nombre, _apellido, _correo)
+    on duplicate key update 
+        password_hash = _password_hash,
+        rol = _rol,
+        nombre = _nombre,
+        apellido = _apellido,
+        correo = _correo;
 end //
 delimiter ;
 
@@ -36,9 +42,9 @@ create procedure sp_iniciar_sesion(
     in _password_hash varchar(255)
 )
 begin
-    select id, username, rol, nombre, apellido, correo, activo 
+    select id_usuario as id, id_usuario, username, password_hash, rol, nombre, apellido, correo, activo 
     from usuarios 
-    where username = _username 
+    where lower(username) = lower(_username) 
       and password_hash = _password_hash 
       and activo = true 
     limit 1;
@@ -52,7 +58,7 @@ call sp_iniciar_sesion('octavio', sha2('admin', 256));
 call sp_registrar_usuario('Cajero', sha2('cajero', 256), 'cajero', 'Cajero', 'Prueba', 'cajero@ejemplo.com'); 
 call sp_iniciar_sesion('Cajero', sha2('cajero', 256));  
 
-call sp_registrar_usuario('Empleado', sha2('empleado', 256), 'empleado', 'Empleado', 'Prueba', 'empleado@ejemplo.com'); 
-call sp_iniciar_sesion('Empleado', sha2('empleado', 256));   
+call sp_registrar_usuario('Bodega', sha2('bodega', 256), 'bodega', 'Bodega', 'Prueba', 'bodega@ejemplo.com'); 
+call sp_iniciar_sesion('Bodega', sha2('bodega', 256));   
 
 select * from usuarios;

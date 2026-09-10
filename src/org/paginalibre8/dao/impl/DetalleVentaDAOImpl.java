@@ -25,7 +25,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
             call.setDouble(4, detalle.getPrecioUnitario());
             return call.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlInsert = "INSERT INTO detalles_venta (id_venta, isbn_libro, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
+            String sqlInsert = "INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlInsert)) {
                 ps.setInt(1, detalle.getIdVenta());
@@ -66,9 +66,9 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
                 }
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT d.*, l.titulo AS titulo_libro "
-                               + "FROM detalles_venta d "
-                               + "LEFT JOIN libros l ON d.isbn_libro = l.isbn "
+            String sqlFallback = "SELECT d.id_detalle AS id, d.*, d.isbn AS isbn_libro, l.titulo AS titulo_libro "
+                               + "FROM detalle_venta d "
+                               + "LEFT JOIN libros l ON d.isbn = l.isbn "
                                + "WHERE d.id_venta = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
@@ -87,9 +87,17 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
 
     private DetalleVenta mapearDetalle(ResultSet rs) throws SQLException {
         DetalleVenta d = new DetalleVenta();
-        d.setId(rs.getInt("id"));
+        try {
+            d.setId(rs.getInt("id"));
+        } catch (SQLException ignored) {
+            d.setId(rs.getInt("id_detalle"));
+        }
         d.setIdVenta(rs.getInt("id_venta"));
-        d.setIsbnLibro(rs.getString("isbn_libro"));
+        try {
+            d.setIsbnLibro(rs.getString("isbn_libro"));
+        } catch (SQLException ignored) {
+            d.setIsbnLibro(rs.getString("isbn"));
+        }
         d.setCantidad(rs.getInt("cantidad"));
         d.setPrecioUnitario(rs.getDouble("precio_unitario"));
         try {

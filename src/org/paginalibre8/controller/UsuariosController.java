@@ -79,7 +79,7 @@ public class UsuariosController implements Initializable {
 
     private void cargarDatosDesdeBD() {
         listaUsuarios.clear();
-        // Llamamos al método de TU DAO
+
         List<Usuario> usuariosBD = usuarioDAO.listarUsuarios(); 
         listaUsuarios.addAll(usuariosBD);
         tblUsuarios.setItems(listaUsuarios);

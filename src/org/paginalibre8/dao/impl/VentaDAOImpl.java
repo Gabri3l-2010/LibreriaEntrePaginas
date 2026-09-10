@@ -33,12 +33,17 @@ public class VentaDAOImpl implements VentaDAO {
             }
         } catch (SQLException e) {
             // Fallback SQL directo
-            String sqlInsert = "INSERT INTO ventas (total, id_usuario, nit_cliente, fecha) VALUES (?, ?, ?, NOW())";
+            String sqlInsert = "INSERT INTO ventas (subtotal, total, id_usuario, cui_cliente, estado) VALUES (?, ?, ?, ?, 'COMPLETADA')";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setDouble(1, venta.getTotal());
-                ps.setInt(2, venta.getIdUsuario());
-                ps.setString(3, venta.getNitCliente());
+                ps.setDouble(2, venta.getTotal());
+                ps.setInt(3, venta.getIdUsuario());
+                try {
+                    ps.setLong(4, Long.parseLong(venta.getNitCliente()));
+                } catch (NumberFormatException nfe) {
+                    ps.setNull(4, java.sql.Types.BIGINT);
+                }
                 int filas = ps.executeUpdate();
                 if (filas > 0) {
                     try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -68,11 +73,11 @@ public class VentaDAOImpl implements VentaDAO {
                 }
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT v.*, u.username AS username_usuario, c.nombre AS nombre_cliente "
+            String sqlFallback = "SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente "
                                + "FROM ventas v "
-                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id "
-                               + "LEFT JOIN clientes c ON v.nit_cliente = c.nit "
-                               + "WHERE v.id = ?";
+                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario "
+                               + "LEFT JOIN clientes c ON v.cui_cliente = c.cui "
+                               + "WHERE v.id_venta = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setInt(1, idVenta);
@@ -99,7 +104,7 @@ public class VentaDAOImpl implements VentaDAO {
                 ventas.add(mapearVenta(rs));
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT * FROM ventas ORDER BY id DESC";
+            String sqlFallback = "SELECT id_venta AS id, v.*, fecha_venta AS fecha, cui_cliente AS nit_cliente FROM ventas v ORDER BY id_venta DESC";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback);
                  ResultSet rs = ps.executeQuery()) {
@@ -118,14 +123,14 @@ public class VentaDAOImpl implements VentaDAO {
         if (venta == null || venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
             return false;
         }
-        String sql = "SELECT stock FROM libros WHERE isbn = ?";
+        String sql = "SELECT stock_actual FROM libros WHERE isbn = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
             for (DetalleVenta d : venta.getDetalles()) {
                 ps.setString(1, d.getIsbnLibro());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        int stockActual = rs.getInt("stock");
+                        int stockActual = rs.getInt("stock_actual");
                         if (stockActual < d.getCantidad()) {
                             System.err.println("Stock insuficiente para ISBN " + d.getIsbnLibro() + ". Disponible: " + stockActual + ", Requerido: " + d.getCantidad());
                             return false;
@@ -157,12 +162,17 @@ public class VentaDAOImpl implements VentaDAO {
             conexion = Conexion.getInstancia().conectar();
             conexion.setAutoCommit(false);
 
-            String sqlVenta = "INSERT INTO ventas (total, id_usuario, nit_cliente, fecha) VALUES (?, ?, ?, NOW())";
+            String sqlVenta = "INSERT INTO ventas (subtotal, total, id_usuario, cui_cliente, estado) VALUES (?, ?, ?, ?, 'COMPLETADA')";
             int idVentaGenerado = -1;
             try (PreparedStatement psVenta = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
                 psVenta.setDouble(1, venta.getTotal());
-                psVenta.setInt(2, venta.getIdUsuario());
-                psVenta.setString(3, venta.getNitCliente());
+                psVenta.setDouble(2, venta.getTotal());
+                psVenta.setInt(3, venta.getIdUsuario());
+                try {
+                    psVenta.setLong(4, Long.parseLong(venta.getNitCliente()));
+                } catch (NumberFormatException nfe) {
+                    psVenta.setNull(4, java.sql.Types.BIGINT);
+                }
                 int filasVenta = psVenta.executeUpdate();
                 if (filasVenta == 0) {
                     throw new SQLException("Falló la inserción del encabezado de la venta.");
@@ -177,8 +187,8 @@ public class VentaDAOImpl implements VentaDAO {
                 }
             }
 
-            String sqlDetalle = "INSERT INTO detalles_venta (id_venta, isbn_libro, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
-            String sqlStock = "UPDATE libros SET stock = stock - ? WHERE isbn = ? AND stock >= ?";
+            String sqlDetalle = "INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
+            String sqlStock = "UPDATE libros SET stock_actual = stock_actual - ? WHERE isbn = ? AND stock_actual >= ?";
 
             try (PreparedStatement psDetalle = conexion.prepareStatement(sqlDetalle);
                  PreparedStatement psStock = conexion.prepareStatement(sqlStock)) {
@@ -200,6 +210,17 @@ public class VentaDAOImpl implements VentaDAO {
                     if (stockActualizado == 0) {
                         throw new SQLException("Stock insuficiente o error al descontar inventario del ISBN: " + d.getIsbnLibro());
                     }
+                }
+            }
+
+            String sqlMov = "INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES (?, 'VENTA', ?, ?, ?)";
+            try (PreparedStatement psMov = conexion.prepareStatement(sqlMov)) {
+                for (DetalleVenta d : venta.getDetalles()) {
+                    psMov.setString(1, d.getIsbnLibro());
+                    psMov.setInt(2, d.getCantidad());
+                    psMov.setInt(3, venta.getIdUsuario());
+                    psMov.setString(4, "Venta #" + idVentaGenerado);
+                    psMov.executeUpdate();
                 }
             }
 
@@ -239,11 +260,11 @@ public class VentaDAOImpl implements VentaDAO {
                 ventas.add(mapearVenta(rs));
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT v.*, u.username AS username_usuario, c.nombre AS nombre_cliente "
+            String sqlFallback = "SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente "
                                + "FROM ventas v "
-                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id "
-                               + "LEFT JOIN clientes c ON v.nit_cliente = c.nit "
-                               + "WHERE DATE(v.fecha) = CURDATE() ORDER BY v.id DESC";
+                               + "LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario "
+                               + "LEFT JOIN clientes c ON v.cui_cliente = c.cui "
+                               + "WHERE DATE(v.fecha_venta) = CURDATE() ORDER BY v.id_venta DESC";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback);
                  ResultSet rs = ps.executeQuery()) {
@@ -260,11 +281,11 @@ public class VentaDAOImpl implements VentaDAO {
     @Override
     public List<Venta> obtenerVentasDelDiaPorUsuario(int idUsuario) {
         List<Venta> ventas = new ArrayList<>();
-        String sqlFallback = "SELECT v.*, u.username AS username_usuario, c.nombre AS nombre_cliente "
+        String sqlFallback = "SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente "
                            + "FROM ventas v "
-                           + "LEFT JOIN usuarios u ON v.id_usuario = u.id "
-                           + "LEFT JOIN clientes c ON v.nit_cliente = c.nit "
-                           + "WHERE DATE(v.fecha) = CURDATE() AND v.id_usuario = ? ORDER BY v.id DESC";
+                           + "LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario "
+                           + "LEFT JOIN clientes c ON v.cui_cliente = c.cui "
+                           + "WHERE DATE(v.fecha_venta) = CURDATE() AND v.id_usuario = ? ORDER BY v.id_venta DESC";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
             ps.setInt(1, idUsuario);
@@ -281,17 +302,29 @@ public class VentaDAOImpl implements VentaDAO {
 
     private Venta mapearVenta(ResultSet rs) throws SQLException {
         Venta v = new Venta();
-        v.setId(rs.getInt("id"));
+        try {
+            v.setId(rs.getInt("id"));
+        } catch (SQLException e) {
+            v.setId(rs.getInt("id_venta"));
+        }
         v.setTotal(rs.getDouble("total"));
         v.setIdUsuario(rs.getInt("id_usuario"));
         try {
             v.setFecha(rs.getTimestamp("fecha") != null ? rs.getTimestamp("fecha").toString() : "");
-        } catch (SQLException ignored) {
-            v.setFecha("");
+        } catch (SQLException e1) {
+            try {
+                v.setFecha(rs.getTimestamp("fecha_venta") != null ? rs.getTimestamp("fecha_venta").toString() : "");
+            } catch (SQLException e2) {
+                v.setFecha("");
+            }
         }
         try {
             v.setNitCliente(rs.getString("nit_cliente"));
-        } catch (SQLException ignored) {}
+        } catch (SQLException e1) {
+            try {
+                v.setNitCliente(String.valueOf(rs.getLong("cui_cliente")));
+            } catch (SQLException e2) {}
+        }
         try {
             v.setUsernameUsuario(rs.getString("username_usuario"));
         } catch (SQLException ignored) {}

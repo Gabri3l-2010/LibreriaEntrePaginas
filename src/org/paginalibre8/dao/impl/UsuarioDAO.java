@@ -26,7 +26,19 @@ public class UsuarioDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("No es posible iniciar sesion intentelo de nuevo: " + e.getMessage());
+            String sqlFallback = "SELECT id_usuario AS id, id_usuario, username, password_hash, rol, nombre, apellido, correo, activo FROM usuarios WHERE LOWER(username) = LOWER(?) AND password_hash = ? AND activo = 1 LIMIT 1";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, username);
+                ps.setString(2, passwordHash);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        usuario = mapearUsuario(rs);
+                    }
+                }
+            } catch (SQLException e2) {
+                System.err.println("No es posible iniciar sesion intentelo de nuevo: " + e2.getMessage());
+            }
         }
         return usuario;
     }
@@ -43,7 +55,7 @@ public class UsuarioDAO {
                 }
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT id, username, rol, nombre, apellido, correo, activo FROM usuarios WHERE username = ?";
+            String sqlFallback = "SELECT id_usuario AS id, username, rol, nombre, apellido, correo, activo FROM usuarios WHERE username = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setString(1, username);
@@ -62,8 +74,7 @@ public class UsuarioDAO {
     /** Lista todos los usuarios para la vista JavaFX de gestión. */
     public List<Usuario> listarUsuarios() {
         List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT id, username, rol, nombre, apellido, correo, activo "
-                   + "FROM usuarios ORDER BY id";
+        String sql = "SELECT * FROM usuarios";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -121,27 +132,34 @@ public class UsuarioDAO {
     }
 
     /** Sobrecarga para autoregistro simple: usuario y contraseña únicamente.
-     *  Asigna rol "Empleado" por defecto y deja nombre/apellido/correo vacíos. */
+     *  Asigna rol "cajero" por defecto y deja nombre/apellido/correo vacíos. */
     public boolean registrarUsuario(String username, String passwordHash) {
-        return registrarUsuario(username, passwordHash, "Empleado", "", "", "");
+        return registrarUsuario(username, passwordHash, "cajero", "", "", "");
     }
 
     /** Desactivación lógica: el registro permanece en la base de datos. */
     public boolean desactivarUsuario(int id) {
-        String sql = "UPDATE usuarios SET activo = 0 WHERE id = ?";
+        String sql = "UPDATE usuarios SET activo = 0 WHERE id_usuario = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al desactivar usuario: " + e.getMessage());
-            return false;
+            String sqlFallback = "UPDATE usuarios SET activo = 0 WHERE id = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setInt(1, id);
+                return ps.executeUpdate() > 0;
+            } catch (SQLException e2) {
+                System.err.println("Error al desactivar usuario: " + e2.getMessage());
+                return false;
+            }
         }
     }
 
     /** Actualización de los datos de un usuario existente (T1.13). */
     public boolean actualizarUsuario(Usuario usuario) {
-        String sql = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id = ?";
+        String sql = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id_usuario = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, usuario.getUsername());
@@ -153,8 +171,21 @@ public class UsuarioDAO {
             ps.setInt(7, usuario.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al actualizar usuario: " + e.getMessage());
-            return false;
+            String sqlFallback = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id = ?";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setString(1, usuario.getUsername());
+                ps.setString(2, usuario.getRol());
+                ps.setString(3, usuario.getNombre());
+                ps.setString(4, usuario.getApellido());
+                ps.setString(5, usuario.getCorreo());
+                ps.setBoolean(6, usuario.isActivo());
+                ps.setInt(7, usuario.getId());
+                return ps.executeUpdate() > 0;
+            } catch (SQLException e2) {
+                System.err.println("Error al actualizar usuario: " + e2.getMessage());
+                return false;
+            }
         }
     }
 
@@ -176,7 +207,7 @@ public class UsuarioDAO {
      * Valida si la contraseña actual del usuario coincide con el hash almacenado (T1.24).
      */
     public boolean validarPasswordActual(int idUsuario, String passwordActualHash) {
-        String sql = "SELECT 1 FROM usuarios WHERE id = ? AND password_hash = ? LIMIT 1";
+        String sql = "SELECT 1 FROM usuarios WHERE id_usuario = ? AND password_hash = ? LIMIT 1";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
@@ -185,8 +216,18 @@ public class UsuarioDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.err.println("Error al validar contraseña actual: " + e.getMessage());
-            return false;
+            String sqlFallback = "SELECT 1 FROM usuarios WHERE id = ? AND password_hash = ? LIMIT 1";
+            try (Connection conexion = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
+                ps.setInt(1, idUsuario);
+                ps.setString(2, passwordActualHash);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next();
+                }
+            } catch (SQLException e2) {
+                System.err.println("Error al validar contraseña actual: " + e2.getMessage());
+                return false;
+            }
         }
     }
 
@@ -202,22 +243,34 @@ public class UsuarioDAO {
             call.execute();
             return true;
         } catch (SQLException e) {
-            String sqlFallback = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+            String sqlFallback = "UPDATE usuarios SET password_hash = ? WHERE id_usuario = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
                 ps.setString(1, nuevaPasswordHash);
                 ps.setInt(2, idUsuario);
                 return ps.executeUpdate() > 0;
             } catch (SQLException e2) {
-                System.err.println("Error al cambiar contraseña: " + e2.getMessage());
-                return false;
+                String sqlFallback2 = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+                try (Connection conexion = Conexion.getInstancia().conectar();
+                     PreparedStatement ps = conexion.prepareStatement(sqlFallback2)) {
+                    ps.setString(1, nuevaPasswordHash);
+                    ps.setInt(2, idUsuario);
+                    return ps.executeUpdate() > 0;
+                } catch (SQLException e3) {
+                    System.err.println("Error al cambiar contraseña: " + e3.getMessage());
+                    return false;
+                }
             }
         }
     }
 
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario();
-        usuario.setId(rs.getInt("id"));
+        try {
+            usuario.setId(rs.getInt("id"));
+        } catch (SQLException ignored) {
+            usuario.setId(rs.getInt("id_usuario"));
+        }
         usuario.setUsername(rs.getString("username"));
         usuario.setRol(rs.getString("rol"));
         usuario.setNombre(rs.getString("nombre"));

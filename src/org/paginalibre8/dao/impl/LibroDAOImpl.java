@@ -42,10 +42,10 @@ public class LibroDAOImpl implements LibroDAO {
         }
 
         try {
-            l.setStock(rs.getInt("stock"));
+            l.setStock(rs.getInt("stock_actual"));
         } catch (SQLException ignored) {
             try {
-                l.setStock(rs.getInt("cantidad_stock"));
+                l.setStock(rs.getInt("stock"));
             } catch (SQLException ignored2) {
                 l.setStock(0);
             }
@@ -109,7 +109,7 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(6, libro.getNitEditorial());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlInsert = "INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, stock, id_categoria, nit_editorial) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sqlInsert = "INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, stock_actual, id_categoria, nit_editorial) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlInsert)) {
                 ps.setString(1, libro.getIsbn());
@@ -203,30 +203,21 @@ public class LibroDAOImpl implements LibroDAO {
         if (autor == null || autor.trim().isEmpty()) {
             return ListarTodos();
         }
-        String sql = "SELECT l.* FROM libros l LEFT JOIN autores a ON l.id_autor = a.id WHERE LOWER(a.nombre) LIKE LOWER(?) OR LOWER(l.autor) LIKE LOWER(?)";
+        String sql = "SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor "
+                   + "FROM libros l "
+                   + "JOIN autores_libro al ON l.isbn = al.isbn "
+                   + "JOIN autores a ON al.id_autor = a.id_autor "
+                   + "WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(?)";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, "%" + autor.trim() + "%");
-            ps.setString(2, "%" + autor.trim() + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     resultados.add(mapearLibro(rs));
                 }
             }
         } catch (SQLException e) {
-            // Fallback en caso de que solo exista campo de texto autor
-            String sqlFallback = "SELECT * FROM libros WHERE LOWER(autor) LIKE LOWER(?)";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
-                ps.setString(1, "%" + autor.trim() + "%");
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        resultados.add(mapearLibro(rs));
-                    }
-                }
-            } catch (SQLException e2) {
-                System.err.println("Error al buscar Libros por autor: " + e2.getMessage());
-            }
+            System.err.println("Error al buscar Libros por autor: " + e.getMessage());
         }
         return resultados;
     }
@@ -244,7 +235,7 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(6, libro.getNitEditorial());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlUpdate = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, stock = ?, id_categoria = ?, nit_editorial = ? WHERE isbn = ?";
+            String sqlUpdate = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, stock_actual = ?, id_categoria = ?, nit_editorial = ? WHERE isbn = ?";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sqlUpdate)) {
                 ps.setString(1, libro.getTitulo());
