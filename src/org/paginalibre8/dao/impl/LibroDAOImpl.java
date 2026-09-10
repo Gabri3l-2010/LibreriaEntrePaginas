@@ -3,7 +3,6 @@ package org.paginalibre8.dao.impl;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -81,17 +80,7 @@ public class LibroDAOImpl implements LibroDAO {
                 libros.add(mapearLibro(tablaResultado));
             }
         } catch (SQLException e) {
-            // Fallback SQL directo en caso de que el procedimiento almacenado falle
-            String sqlFallback = "SELECT * FROM libros";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlFallback);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    libros.add(mapearLibro(rs));
-                }
-            } catch (SQLException e2) {
-                System.err.println("Error al listar Libros: " + e2.getMessage());
-            }
+            System.err.println("Error al listar Libros: " + e.getMessage());
         }
         return libros;
     }
@@ -109,21 +98,8 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(6, libro.getNitEditorial());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlInsert = "INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, stock_actual, id_categoria, nit_editorial) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlInsert)) {
-                ps.setString(1, libro.getIsbn());
-                ps.setString(2, libro.getTitulo());
-                ps.setDate(3, Date.valueOf(libro.getFechaPublicacion()));
-                ps.setDouble(4, libro.getPrecio());
-                ps.setInt(5, libro.getStock());
-                ps.setInt(6, libro.getIdCategoria());
-                ps.setString(7, libro.getNitEditorial());
-                return ps.executeUpdate() > 0;
-            } catch (SQLException e2) {
-                System.err.println("Error al crear Libro: " + e2.getMessage());
-                return false;
-            }
+            System.err.println("Error al crear Libro: " + e.getMessage());
+            return false;
         } catch (IllegalArgumentException e) {
             System.err.println("Fecha de publicación inválida, use el formato AAAA-MM-DD: " + e.getMessage());
             return false;
@@ -135,7 +111,6 @@ public class LibroDAOImpl implements LibroDAO {
         return buscarPorIsbn(isbn);
     }
 
-
     @Override
     public Libro buscarPorIsbn(String isbn) {
         if (isbn == null || isbn.trim().isEmpty()) {
@@ -145,41 +120,28 @@ public class LibroDAOImpl implements LibroDAO {
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement consultaCall = conexion.prepareCall(consultaSQL)) {
             consultaCall.setString(1, isbn.trim());
-            ResultSet tablaResultado = consultaCall.executeQuery();
-            if (tablaResultado.next()) {
-                return mapearLibro(tablaResultado);
-            }
-        } catch (SQLException e) {
-            // Fallback SQL directo por ISBN
-        }
-        String sqlFallback = "SELECT * FROM libros WHERE isbn = ? OR isbn LIKE ? LIMIT 1";
-        try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
-            ps.setString(1, isbn.trim());
-            ps.setString(2, "%" + isbn.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapearLibro(rs);
+            try (ResultSet tablaResultado = consultaCall.executeQuery()) {
+                if (tablaResultado.next()) {
+                    return mapearLibro(tablaResultado);
                 }
             }
-        } catch (SQLException e2) {
-            System.err.println("Error al buscar Libro por ISBN: " + e2.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error al buscar Libro por ISBN: " + e.getMessage());
         }
         return null;
     }
 
-  
     @Override
     public List<Libro> buscarPorTitulo(String titulo) {
         List<Libro> resultados = new ArrayList<>();
         if (titulo == null || titulo.trim().isEmpty()) {
             return ListarTodos();
         }
-        String sql = "SELECT * FROM libros WHERE LOWER(titulo) LIKE LOWER(?)";
+        String sql = "{call sp_buscar_libros_por_titulo(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, "%" + titulo.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setString(1, titulo.trim());
+            try (ResultSet rs = call.executeQuery()) {
                 while (rs.next()) {
                     resultados.add(mapearLibro(rs));
                 }
@@ -190,22 +152,17 @@ public class LibroDAOImpl implements LibroDAO {
         return resultados;
     }
 
-
     @Override
     public List<Libro> buscarPorAutor(String autor) {
         List<Libro> resultados = new ArrayList<>();
         if (autor == null || autor.trim().isEmpty()) {
             return ListarTodos();
         }
-        String sql = "SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor "
-                   + "FROM libros l "
-                   + "JOIN autores_libro al ON l.isbn = al.isbn "
-                   + "JOIN autores a ON al.id_autor = a.id_autor "
-                   + "WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(?)";
+        String sql = "{call sp_buscar_libros_por_autor(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
-             PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, "%" + autor.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
+             CallableStatement call = conexion.prepareCall(sql)) {
+            call.setString(1, autor.trim());
+            try (ResultSet rs = call.executeQuery()) {
                 while (rs.next()) {
                     resultados.add(mapearLibro(rs));
                 }
@@ -229,21 +186,8 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(6, libro.getNitEditorial());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlUpdate = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, stock_actual = ?, id_categoria = ?, nit_editorial = ? WHERE isbn = ?";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlUpdate)) {
-                ps.setString(1, libro.getTitulo());
-                ps.setDate(2, Date.valueOf(libro.getFechaPublicacion()));
-                ps.setDouble(3, libro.getPrecio());
-                ps.setInt(4, libro.getStock());
-                ps.setInt(5, libro.getIdCategoria());
-                ps.setString(6, libro.getNitEditorial());
-                ps.setString(7, libro.getIsbn());
-                return ps.executeUpdate() > 0;
-            } catch (SQLException e2) {
-                System.err.println("Error al actualizar Libro: " + e2.getMessage());
-                return false;
-            }
+            System.err.println("Error al actualizar Libro: " + e.getMessage());
+            return false;
         } catch (IllegalArgumentException e) {
             System.err.println("Fecha de publicación inválida, use el formato AAAA-MM-DD: " + e.getMessage());
             return false;
@@ -258,15 +202,8 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(1, isbn);
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            String sqlFallback = "DELETE FROM libros WHERE isbn = ?";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
-                ps.setString(1, isbn);
-                return ps.executeUpdate() > 0;
-            } catch (SQLException e2) {
-                System.err.println("Error al eliminar Libro: " + e2.getMessage());
-                return false;
-            }
+            System.err.println("Error al eliminar Libro: " + e.getMessage());
+            return false;
         }
     }
 }

@@ -2,7 +2,6 @@ package org.paginalibre8.dao.impl;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,28 +15,16 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
     public boolean registrarDetalle(DetalleVenta detalle) {
         if (detalle == null) return false;
 
-        String sqlProc = "{call sp_registrar_detalle_venta(?, ?, ?, ?)}";
+        String sqlProc = "{call sp_insertardetalleventa(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement call = conexion.prepareCall(sqlProc)) {
             call.setInt(1, detalle.getIdVenta());
             call.setString(2, detalle.getIsbnLibro());
-            call.setInt(3, detalle.getCantidad());
-            call.setDouble(4, detalle.getPrecioUnitario());
-            return call.executeUpdate() > 0;
+            call.execute();
+            return true;
         } catch (SQLException e) {
-            String sqlInsert = "INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlInsert)) {
-                ps.setInt(1, detalle.getIdVenta());
-                ps.setString(2, detalle.getIsbnLibro());
-                ps.setInt(3, detalle.getCantidad());
-                ps.setDouble(4, detalle.getPrecioUnitario());
-                ps.setDouble(5, detalle.getSubtotal());
-                return ps.executeUpdate() > 0;
-            } catch (SQLException e2) {
-                System.err.println("Error al registrar DetalleVenta: " + e2.getMessage());
-                return false;
-            }
+            System.err.println("Error al registrar DetalleVenta: " + e.getMessage());
+            return false;
         }
     }
 
@@ -56,7 +43,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
     @Override
     public List<DetalleVenta> obtenerDetallesPorVenta(int idVenta) {
         List<DetalleVenta> lista = new ArrayList<>();
-        String sqlProc = "{call sp_obtener_detalles_venta(?)}";
+        String sqlProc = "{call sp_obtener_detalles_por_venta(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement call = conexion.prepareCall(sqlProc)) {
             call.setInt(1, idVenta);
@@ -66,21 +53,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
                 }
             }
         } catch (SQLException e) {
-            String sqlFallback = "SELECT d.id_detalle AS id, d.*, d.isbn AS isbn_libro, l.titulo AS titulo_libro "
-                               + "FROM detalle_venta d "
-                               + "LEFT JOIN libros l ON d.isbn = l.isbn "
-                               + "WHERE d.id_venta = ?";
-            try (Connection conexion = Conexion.getInstancia().conectar();
-                 PreparedStatement ps = conexion.prepareStatement(sqlFallback)) {
-                ps.setInt(1, idVenta);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        lista.add(mapearDetalle(rs));
-                    }
-                }
-            } catch (SQLException e2) {
-                System.err.println("Error al obtener DetallesVenta por idVenta: " + e2.getMessage());
-            }
+            System.err.println("Error al obtener DetallesVenta por idVenta: " + e.getMessage());
         }
         return lista;
     }

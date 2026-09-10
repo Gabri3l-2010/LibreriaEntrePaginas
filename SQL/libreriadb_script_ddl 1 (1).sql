@@ -469,6 +469,141 @@ BEGIN
     ORDER BY v.id_venta DESC;
 END $$
 
+DROP PROCEDURE IF EXISTS sp_listar_usuarios $$
+CREATE PROCEDURE sp_listar_usuarios()
+BEGIN
+    SELECT id_usuario AS id, id_usuario, username, password_hash, rol, nombre, apellido, correo, activo 
+    FROM usuarios;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_obtener_usuario_por_id $$
+CREATE PROCEDURE sp_obtener_usuario_por_id(IN _id_usuario INT)
+BEGIN
+    SELECT id_usuario AS id, id_usuario, username, password_hash, rol, nombre, apellido, correo, activo 
+    FROM usuarios 
+    WHERE id_usuario = _id_usuario;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_actualizar_usuario $$
+CREATE PROCEDURE sp_actualizar_usuario(
+    IN _id_usuario INT,
+    IN _username VARCHAR(50),
+    IN _rol VARCHAR(20),
+    IN _nombre VARCHAR(100),
+    IN _apellido VARCHAR(100),
+    IN _correo VARCHAR(100),
+    IN _activo BOOLEAN
+)
+BEGIN
+    UPDATE usuarios 
+    SET username = _username, rol = LOWER(_rol), nombre = _nombre, apellido = _apellido, correo = _correo, activo = _activo 
+    WHERE id_usuario = _id_usuario;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_desactivar_usuario $$
+CREATE PROCEDURE sp_desactivar_usuario(IN _id_usuario INT)
+BEGIN
+    UPDATE usuarios SET activo = FALSE WHERE id_usuario = _id_usuario;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_validar_password $$
+CREATE PROCEDURE sp_validar_password(
+    IN _id_usuario INT,
+    IN _password_hash VARCHAR(255)
+)
+BEGIN
+    SELECT 1 FROM usuarios WHERE id_usuario = _id_usuario AND password_hash = _password_hash LIMIT 1;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_existe_username $$
+CREATE PROCEDURE sp_existe_username(IN _username VARCHAR(50))
+BEGIN
+    SELECT 1 FROM usuarios WHERE username = _username LIMIT 1;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_buscar_libros_por_titulo $$
+CREATE PROCEDURE sp_buscar_libros_por_titulo(IN _titulo VARCHAR(100))
+BEGIN
+    SELECT l.*, l.stock_actual AS stock 
+    FROM libros l 
+    WHERE LOWER(l.titulo) LIKE LOWER(CONCAT('%', _titulo, '%'));
+END $$
+
+DROP PROCEDURE IF EXISTS sp_buscar_libros_por_autor $$
+CREATE PROCEDURE sp_buscar_libros_por_autor(IN _autor VARCHAR(100))
+BEGIN
+    SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor 
+    FROM libros l 
+    JOIN autores_libro al ON l.isbn = al.isbn 
+    JOIN autores a ON al.id_autor = a.id_autor 
+    WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(CONCAT('%', _autor, '%'));
+END $$
+
+DROP PROCEDURE IF EXISTS sp_buscar_venta_por_id $$
+CREATE PROCEDURE sp_buscar_venta_por_id(IN _id_venta INT)
+BEGIN
+    SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente 
+    FROM ventas v 
+    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario 
+    LEFT JOIN clientes c ON v.cui_cliente = c.cui 
+    WHERE v.id_venta = _id_venta;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_listar_ventas $$
+CREATE PROCEDURE sp_listar_ventas()
+BEGIN
+    SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente 
+    FROM ventas v 
+    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario 
+    LEFT JOIN clientes c ON v.cui_cliente = c.cui 
+    ORDER BY v.id_venta DESC;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_validar_stock_libro $$
+CREATE PROCEDURE sp_validar_stock_libro(IN _isbn VARCHAR(20))
+BEGIN
+    SELECT stock_actual FROM libros WHERE isbn = _isbn;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_actualizar_stock_libro $$
+CREATE PROCEDURE sp_actualizar_stock_libro(IN _isbn VARCHAR(20), IN _cantidad INT)
+BEGIN
+    UPDATE libros SET stock_actual = stock_actual - _cantidad WHERE isbn = _isbn AND stock_actual >= _cantidad;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_obtener_ventas_del_dia_por_usuario $$
+CREATE PROCEDURE sp_obtener_ventas_del_dia_por_usuario(IN _id_usuario INT)
+BEGIN
+    SELECT v.id_venta AS id, v.*, v.fecha_venta AS fecha, v.cui_cliente AS nit_cliente, u.username AS username_usuario, CONCAT(c.nombre_cliente, ' ', c.apellido_cliente) AS nombre_cliente 
+    FROM ventas v 
+    LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario 
+    LEFT JOIN clientes c ON v.cui_cliente = c.cui 
+    WHERE DATE(v.fecha_venta) = CURDATE() AND v.id_usuario = _id_usuario 
+    ORDER BY v.id_venta DESC;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_obtener_detalles_por_venta $$
+CREATE PROCEDURE sp_obtener_detalles_por_venta(IN _id_venta INT)
+BEGIN
+    SELECT d.id_detalle AS id, d.*, d.isbn AS isbn_libro, l.titulo AS titulo_libro 
+    FROM detalle_venta d 
+    LEFT JOIN libros l ON d.isbn = l.isbn 
+    WHERE d.id_venta = _id_venta;
+END $$
+
+DROP PROCEDURE IF EXISTS sp_registrar_movimiento_inventario $$
+CREATE PROCEDURE sp_registrar_movimiento_inventario(
+    IN _isbn VARCHAR(20),
+    IN _tipo_movimiento VARCHAR(20),
+    IN _cantidad INT,
+    IN _id_usuario INT,
+    IN _observacion VARCHAR(255)
+)
+BEGIN
+    INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) 
+    VALUES (_isbn, _tipo_movimiento, _cantidad, _id_usuario, _observacion);
+END $$
+
 DELIMITER ;
 
 -- =============================================================================
