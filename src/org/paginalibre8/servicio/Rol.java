@@ -33,6 +33,7 @@ public enum Rol {
         }
         switch (texto.trim().toLowerCase()) {
             case "administrador":
+                 return ADMIN;
             case "admin":
                 return ADMIN;
             case "cajero":

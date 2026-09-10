@@ -36,7 +36,6 @@ public class UsuariosController implements Initializable {
     @FXML private TableColumn<Usuario, String> colEstado;
     @FXML private TableColumn<Usuario, Void> colAccion;
 
-    // 1. Instanciamos TU DAO original
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
 
@@ -46,32 +45,29 @@ public class UsuariosController implements Initializable {
         cmbEstado.getItems().addAll("Activo", "Inactivo");
         cmbEstado.setValue("Activo");
 
-        // 2. Configuramos las columnas para que lean directamente los Getters de tu clase Usuario
         colId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()));
         colUsuario.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUsername()));
         colNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
         colApellido.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getApellido()));
         colRol1.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRol()));
         colCorreo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCorreo()));
-        
+
         colEstado.setCellValueFactory(cellData -> {
             boolean activo = cellData.getValue().isActivo();
             return new SimpleStringProperty(activo ? "Activo" : "Inactivo");
         });
 
-        // 3. Cargamos los datos de MySQL a la tabla
         cargarDatosDesdeBD();
 
-        // 4. Evento para pasar los datos de la fila seleccionada al formulario
         tblUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                txtUsername.setText(newSelection.getUsername()); 
+                txtUsername.setText(newSelection.getUsername());
                 txtPassword.clear();
                 txtConfirmar.clear();
                 txtNombre.setText(valorSeguro(newSelection.getNombre()));
                 txtApellido.setText(valorSeguro(newSelection.getApellido()));
                 txtCorreo.setText(newSelection.getCorreo());
-                cmbRol.setValue(newSelection.getRol());
+                cmbRol.setValue(mapRolParaUI(newSelection.getRol()));
                 cmbEstado.setValue(newSelection.isActivo() ? "Activo" : "Inactivo");
             }
         });
@@ -80,7 +76,7 @@ public class UsuariosController implements Initializable {
     private void cargarDatosDesdeBD() {
         listaUsuarios.clear();
 
-        List<Usuario> usuariosBD = usuarioDAO.listarUsuarios(); 
+        List<Usuario> usuariosBD = usuarioDAO.listarUsuarios();
         listaUsuarios.addAll(usuariosBD);
         tblUsuarios.setItems(listaUsuarios);
     }
@@ -97,7 +93,7 @@ public class UsuariosController implements Initializable {
         }
 
         boolean guardado = usuarioDAO.registrarUsuario(username,
-                SecurityUtil.hashSHA256(txtPassword.getText()), cmbRol.getValue(),
+                SecurityUtil.hashSHA256(txtPassword.getText()), mapRolParaBD(cmbRol.getValue()),
                 txtNombre.getText().trim(), txtApellido.getText().trim(), txtCorreo.getText().trim());
         if (guardado) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Usuario guardado", "El usuario se registró correctamente.");
@@ -128,7 +124,7 @@ public class UsuariosController implements Initializable {
         seleccionado.setNombre(txtNombre.getText().trim());
         seleccionado.setApellido(txtApellido.getText().trim());
         seleccionado.setCorreo(txtCorreo.getText().trim());
-        seleccionado.setRol(cmbRol.getValue());
+        seleccionado.setRol(mapRolParaBD(cmbRol.getValue()));
         seleccionado.setActivo("Activo".equals(cmbEstado.getValue()));
 
         boolean actualizado = usuarioDAO.actualizarUsuario(seleccionado);
@@ -212,6 +208,27 @@ public class UsuariosController implements Initializable {
     }
 
     private String valorSeguro(String valor) { return valor == null ? "" : valor; }
+
+  
+    private String mapRolParaBD(String rolUI) {
+        if (rolUI == null) return null;
+        return switch (rolUI) {
+            case "Administrador" -> "admin";
+            case "Cajero", "Empleado" -> "cajero";
+            case "Bodega" -> "bodega";
+            default -> rolUI.toLowerCase();
+        };
+    }
+
+    private String mapRolParaUI(String rolBD) {
+        if (rolBD == null) return null;
+        return switch (rolBD.toLowerCase()) {
+            case "admin" -> "Administrador";
+            case "cajero" -> "Cajero";
+            case "bodega" -> "Bodega";
+            default -> rolBD;
+        };
+    }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);

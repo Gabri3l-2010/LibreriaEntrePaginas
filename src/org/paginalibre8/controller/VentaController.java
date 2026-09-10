@@ -59,9 +59,6 @@ public class VentaController implements Initializable {
         }
     }
 
-    /**
-     * T2.12 - Carrito de Venta
-     */
     private void configurarTablaCarrito() {
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbnLibro"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("tituloLibro"));
@@ -80,9 +77,7 @@ public class VentaController implements Initializable {
         }
     }
 
-    /**
-     * T2.13 & T2.17 - Agregar productos y Validar stock disponible
-     */
+  
     @FXML
     private void handleAgregarProducto(ActionEvent event) {
         String isbn = txtIsbn.getText() != null ? txtIsbn.getText().trim() : "";
@@ -99,7 +94,6 @@ public class VentaController implements Initializable {
 
         int cantidad = spnCantidad.getValue() != null ? spnCantidad.getValue() : 1;
 
-        // T2.17: Validar stock disponible
         int cantidadEnCarrito = 0;
         DetalleVenta existente = null;
         for (DetalleVenta d : carritoList) {
@@ -130,9 +124,7 @@ public class VentaController implements Initializable {
         calcularTotal();
     }
 
-    /**
-     * T2.13 - Eliminar productos del carrito
-     */
+    
     @FXML
     private void handleEliminarProducto(ActionEvent event) {
         DetalleVenta seleccionado = tblCarrito.getSelectionModel().getSelectedItem();
@@ -144,18 +136,14 @@ public class VentaController implements Initializable {
         calcularTotal();
     }
 
-    /**
-     * T2.13 - Vaciar todo el carrito
-     */
+ 
     @FXML
     private void handleVaciarCarrito(ActionEvent event) {
         carritoList.clear();
         calcularTotal();
     }
 
-    /**
-     * T2.15 & T2.16 - Calcular Subtotal y Total de Venta
-     */
+ 
     private void calcularTotal() {
         double sumaTotal = 0.0;
         for (DetalleVenta d : carritoList) {
@@ -167,10 +155,6 @@ public class VentaController implements Initializable {
             lblTotal.setText(String.format("Q %.2f", sumaTotal));
         }
     }
-
-    /**
-     * T2.18, T2.19, T2.20 & T2.21 - Procesar Venta con Transacción JDBC, Actualización de Stock, Rollback y Pruebas
-     */
     @FXML
     private void handleProcesarVenta(ActionEvent event) {
         if (carritoList.isEmpty()) {
@@ -196,13 +180,11 @@ public class VentaController implements Initializable {
             venta.agregarDetalle(d);
         }
 
-        // T2.17: Validar stock final antes de la transacción
         if (!ventaDAO.validarStockVenta(venta)) {
             mostrarError("Error de Stock", "Uno o más productos del carrito no cuentan con suficiente stock disponible.");
             return;
         }
 
-        // T2.18, T2.19 & T2.20: Transacción JDBC + Actualización de Stock + Rollback
         boolean registrada = ventaDAO.registrarVentaTransaccional(venta);
 
         if (registrada) {

@@ -13,13 +13,20 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.paginalibre8.dao.impl.LibroDAO;
+import org.paginalibre8.dao.impl.LibroDAOImpl;
 import org.paginalibre8.dao.impl.VentaDAO;
 import org.paginalibre8.dao.impl.VentaDAOImpl;
+import org.paginalibre8.model.DetalleVenta;
+import org.paginalibre8.model.Libro;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.model.Venta;
 import org.paginalibre8.servicio.SesionUsuario;
@@ -27,18 +34,37 @@ import org.paginalibre8.system.Main;
 
 public class DashboardCajeroController implements Initializable, DashboardController {
 
+    // ---- KPIs / cabecera ----
     @FXML private Label lblUsuario;
     @FXML private Label lblTotalVentasDia;
     @FXML private Label lblCantVentasDia;
 
+    // ---- Tabla de ventas del día ----
     @FXML private TableView<Venta> tblVentasDia;
     @FXML private TableColumn<Venta, Integer> colIdVenta;
     @FXML private TableColumn<Venta, String> colFechaVenta;
     @FXML private TableColumn<Venta, String> colNitCliente;
     @FXML private TableColumn<Venta, Double> colTotalVenta;
 
+    // ---- Formulario de Nueva Venta (embebido) ----
+    @FXML private TextField txtNitCliente;
+    @FXML private TextField txtNombreCliente;
+    @FXML private TextField txtIsbn;
+    @FXML private Spinner<Integer> spnCantidad;
+
+    @FXML private TableView<DetalleVenta> tblCarrito;
+    @FXML private TableColumn<DetalleVenta, String> colIsbn;
+    @FXML private TableColumn<DetalleVenta, String> colTitulo;
+    @FXML private TableColumn<DetalleVenta, Double> colPrecio;
+    @FXML private TableColumn<DetalleVenta, Integer> colCantidad;
+    @FXML private TableColumn<DetalleVenta, Double> colSubtotal;
+
+    @FXML private Label lblTotal;
+
     private final VentaDAO ventaDAO = new VentaDAOImpl();
+    private final LibroDAO libroDAO = new LibroDAOImpl();
     private final ObservableList<Venta> ventasDiaList = FXCollections.observableArrayList();
+    private final ObservableList<DetalleVenta> carritoList = FXCollections.observableArrayList();
     private Usuario usuarioActual;
 
     @Override
@@ -54,6 +80,11 @@ public class DashboardCajeroController implements Initializable, DashboardContro
             }
         }
         configurarTablaVentas();
+        configurarTablaCarrito();
+        configurarSpinner();
+        if (txtNitCliente != null) {
+            txtNitCliente.setText("C/F");
+        }
         cargarVentasDelDia();
     }
 
@@ -66,9 +97,7 @@ public class DashboardCajeroController implements Initializable, DashboardContro
         cargarVentasDelDia();
     }
 
-    /**
-     * T2.29 - Tabla / Resumen de Ventas del Día
-     */
+
     private void configurarTablaVentas() {
         if (tblVentasDia == null) return;
         colIdVenta.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -79,9 +108,6 @@ public class DashboardCajeroController implements Initializable, DashboardContro
         tblVentasDia.setItems(ventasDiaList);
     }
 
-    /**
-     * T2.27 & T2.29 - Carga y cálculo de resumen de ventas del día
-     */
     public void cargarVentasDelDia() {
         ventasDiaList.clear();
         List<Venta> ventas;
@@ -114,27 +140,163 @@ public class DashboardCajeroController implements Initializable, DashboardContro
         cargarVentasDelDia();
     }
 
-    /**
-     * T2.30 - Integración con el Punto de Venta
-     */
-    @FXML
-    private void handleVentas(ActionEvent event) {
-        if (!SesionUsuario.getInstancia().tienePermiso("VENDER")) {
-            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para realizar ventas.");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/VentaView.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Punto de Venta - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 940, 660));
-            stage.showAndWait();
-            cargarVentasDelDia();
-        } catch (Exception e) {
-            mostrarError("Error al abrir el Punto de Venta:\n" + e.getMessage());
+
+
+    private void configurarTablaCarrito() {
+        if (tblCarrito == null) return;
+        colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbnLibro"));
+        colTitulo.setCellValueFactory(new PropertyValueFactory<>("tituloLibro"));
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
+        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
+
+        tblCarrito.setItems(carritoList);
+    }
+
+    private void configurarSpinner() {
+        if (spnCantidad != null) {
+            SpinnerValueFactory<Integer> valueFactory =
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1);
+            spnCantidad.setValueFactory(valueFactory);
         }
     }
+
+    @FXML
+    private void handleAgregarProducto(ActionEvent event) {
+        String isbn = txtIsbn.getText() != null ? txtIsbn.getText().trim() : "";
+        if (isbn.isEmpty()) {
+            mostrarAdvertencia("Campo Requerido", "Por favor ingresa un ISBN para buscar el producto.");
+            return;
+        }
+
+        Libro libro = libroDAO.buscarPorIsbn(isbn);
+        if (libro == null) {
+            mostrarError("No existe un libro con el ISBN proporcionado.");
+            return;
+        }
+
+        int cantidad = spnCantidad.getValue() != null ? spnCantidad.getValue() : 1;
+
+        int cantidadEnCarrito = 0;
+        DetalleVenta existente = null;
+        for (DetalleVenta d : carritoList) {
+            if (d.getIsbnLibro().equalsIgnoreCase(libro.getIsbn())) {
+                existente = d;
+                cantidadEnCarrito = d.getCantidad();
+                break;
+            }
+        }
+
+        if (libro.getStock() > 0 && (cantidadEnCarrito + cantidad) > libro.getStock()) {
+            mostrarAdvertencia("Stock Insuficiente",
+                    "El libro '" + libro.getTitulo() + "' solo cuenta con " + libro.getStock() +
+                    " unidades disponibles en stock.");
+            return;
+        }
+
+        if (existente != null) {
+            existente.setCantidad(existente.getCantidad() + cantidad);
+            tblCarrito.refresh();
+        } else {
+            DetalleVenta nuevo = new DetalleVenta(libro.getIsbn(), libro.getTitulo(), cantidad, libro.getPrecio());
+            carritoList.add(nuevo);
+        }
+
+        txtIsbn.clear();
+        spnCantidad.getValueFactory().setValue(1);
+        calcularTotal();
+    }
+
+    @FXML
+    private void handleEliminarProducto(ActionEvent event) {
+        DetalleVenta seleccionado = tblCarrito.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAdvertencia("Selección Requerida", "Por favor selecciona un producto del carrito para quitarlo.");
+            return;
+        }
+        carritoList.remove(seleccionado);
+        calcularTotal();
+    }
+
+    @FXML
+    private void handleVaciarCarrito(ActionEvent event) {
+        carritoList.clear();
+        calcularTotal();
+    }
+
+    private void calcularTotal() {
+        double sumaTotal = 0.0;
+        for (DetalleVenta d : carritoList) {
+            d.calcularSubtotal();
+            sumaTotal += d.getSubtotal();
+        }
+        sumaTotal = Math.round(sumaTotal * 100.0) / 100.0;
+        if (lblTotal != null) {
+            lblTotal.setText(String.format("Q %.2f", sumaTotal));
+        }
+    }
+
+    @FXML
+    private void handleProcesarVenta(ActionEvent event) {
+        if (carritoList.isEmpty()) {
+            mostrarAdvertencia("Carrito Vacío", "No hay productos en el carrito para procesar la venta.");
+            return;
+        }
+
+        String nit = txtNitCliente.getText() != null ? txtNitCliente.getText().trim() : "C/F";
+        if (nit.isEmpty()) {
+            nit = "C/F";
+        }
+
+        int idUsuario = 1;
+        if (SesionUsuario.getInstancia().haySesionActiva()) {
+            Usuario u = SesionUsuario.getInstancia().getUsuarioActual();
+            if (u != null && u.getId() > 0) {
+                idUsuario = u.getId();
+            }
+        }
+
+        Venta venta = new Venta(idUsuario, nit);
+        for (DetalleVenta d : carritoList) {
+            venta.agregarDetalle(d);
+        }
+
+        if (!ventaDAO.validarStockVenta(venta)) {
+            mostrarError("Uno o más productos del carrito no cuentan con suficiente stock disponible.");
+            return;
+        }
+
+        boolean registrada = ventaDAO.registrarVentaTransaccional(venta);
+
+        if (registrada) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/ComprobanteView.fxml"));
+                Parent root = loader.load();
+                ComprobanteController comprobanteCtrl = loader.getController();
+                if (comprobanteCtrl != null) {
+                    comprobanteCtrl.cargarComprobante(venta);
+                }
+                Stage stage = new Stage();
+                stage.setTitle("Comprobante de Venta #" + venta.getId());
+                stage.setScene(new Scene(root, 480, 620));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.show();
+            } catch (Exception e) {
+                System.err.println("Error al desplegar comprobante: " + e.getMessage());
+            }
+
+            mostrarInfo("Venta Exitosa", "¡La venta #" + venta.getId() + " fue registrada exitosamente!\nTotal: Q" + String.format("%.2f", venta.getTotal()));
+            carritoList.clear();
+            txtNitCliente.setText("C/F");
+            txtNombreCliente.clear();
+            txtIsbn.clear();
+            calcularTotal();
+            cargarVentasDelDia();
+        } else {
+            mostrarError("No fue posible procesar la venta. Se ha revertido la operación (Rollback).");
+        }
+    }
+
 
     @FXML
     private void handleClientes(ActionEvent event) {
