@@ -8,19 +8,18 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.servicio.SesionUsuario;
 import org.paginalibre8.system.Main;
 
 public class MenuPrincipalDashboardController implements Initializable, DashboardController {
 
-    @FXML
-    private Label lblUsuario;
+    @FXML private Label lblUsuario;
+    @FXML private StackPane contentArea;
+    
     private Usuario usuarioActual;
 
     @Override
@@ -28,51 +27,19 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
         if (SesionUsuario.getInstancia().haySesionActiva()) {
             this.usuarioActual = SesionUsuario.getInstancia().getUsuarioActual();
             if (lblUsuario != null) {
-                lblUsuario.setText("Administrador: " + SesionUsuario.getInstancia().getNombreCompleto());
+                lblUsuario.setText("Admin: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
+        Platform.runLater(this::handleUsuarios);
     }
 
     @Override
     public void iniciarUsuario(Usuario usuario) {
         this.usuarioActual = usuario;
         if (lblUsuario != null && usuario != null) {
-            lblUsuario.setText("Administrador: " + usuario.getUsername());
+            lblUsuario.setText("Admin: " + usuario.getUsername());
         }
-    }
-
-    @FXML
-    private void handleCategorias() {
-        mostrarInfo("Módulo de Categorías", "Abriendo gestión de categorías...");
-    }
-
-    @FXML
-    private void handleEditoriales() {
-        mostrarInfo("Módulo de Editoriales", "Abriendo gestión de editoriales...");
-    }
-
-    @FXML
-    private void handleClientes() {
-        mostrarInfo("Módulo de Clientes", "Abriendo gestión de clientes...");
-    }
-
-    @FXML
-    private void handleAutores() {
-        mostrarInfo("Módulo de Autores", "Abriendo gestión de autores...");
-    }
-
-    @FXML
-    private void handleLibros() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/BuscadorLibrosView.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Buscador de Libros - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 920, 640));
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al cargar el buscador de libros:\n" + e.getMessage());
-        }
+        Platform.runLater(this::handleUsuarios);
     }
 
     @FXML
@@ -81,31 +48,37 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permisos suficientes para acceder a la Gestión de Usuarios.");
             return;
         }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/Usuarios.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Gestión de Usuarios - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 1050, 550));
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al cargar la vista de gestión de usuarios:\n" + e.getMessage());
-        }
+        cargarVista("/org/paginalibre8/view/style/Usuarios.fxml");
+    }
+
+    @FXML
+    private void handleLibros() {
+        cargarVista("/org/paginalibre8/view/style/BuscadorLibrosView.fxml");
+    }
+
+    @FXML
+    private void handleClientes() {
+        mostrarInfo("Módulo de Clientes", "Gestión de clientes en desarrollo.");
+    }
+
+    @FXML
+    private void handleAutores() {
+        mostrarInfo("Módulo de Autores", "Gestión de autores en desarrollo.");
+    }
+
+    @FXML
+    private void handleCategorias() {
+        mostrarInfo("Módulo de Categorías", "Gestión de categorías en desarrollo.");
+    }
+
+    @FXML
+    private void handleEditoriales() {
+        mostrarInfo("Módulo de Editoriales", "Gestión de editoriales en desarrollo.");
     }
 
     @FXML
     private void handleCambiarPassword(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/CambioPasswordView.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Cambio de Contraseña");
-            stage.setScene(new Scene(root, 420, 340));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al abrir cambio de contraseña: " + e.getMessage());
-        }
+        cargarVista("/org/paginalibre8/view/style/CambioPasswordView.fxml");
     }
 
     @FXML
@@ -115,6 +88,18 @@ public class MenuPrincipalDashboardController implements Initializable, Dashboar
             Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");
         } catch (Exception e) {
             Platform.exit();
+        }
+    }
+
+    private void cargarVista(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent vista = loader.load();
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(vista);
+            }
+        } catch (Exception e) {
+            mostrarError("Error al cargar la vista (" + fxmlPath + "):\n" + e.getMessage());
         }
     }
 
