@@ -54,6 +54,7 @@ CREATE TABLE clientes (
     correo_electronico VARCHAR(100)
 );
 
+-- T3.4.1 (D1): Revisar la estructura actual de la tabla libros
 CREATE TABLE libros (
     isbn VARCHAR(20) PRIMARY KEY,
     titulo VARCHAR(100) NOT NULL,
