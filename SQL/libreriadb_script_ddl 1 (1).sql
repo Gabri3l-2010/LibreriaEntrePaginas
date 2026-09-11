@@ -382,19 +382,25 @@ END $$
 DROP PROCEDURE IF EXISTS sp_listarlibros $$
 CREATE PROCEDURE sp_listarlibros()
 BEGIN
-    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial 
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial,
+           COALESCE(CONCAT(a.nombre_autor, ' ', a.apellido_autor), 'Sin autor') AS autor
     FROM libros l
     LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
-    LEFT JOIN editoriales e ON l.nit_editorial = e.nit;
+    LEFT JOIN editoriales e ON l.nit_editorial = e.nit
+    LEFT JOIN autores_libro al ON l.isbn = al.isbn
+    LEFT JOIN autores a ON al.id_autor = a.id_autor;
 END $$
 
 DROP PROCEDURE IF EXISTS sp_buscarlibro $$
 CREATE PROCEDURE sp_buscarlibro(IN _isbn VARCHAR(20))
 BEGIN
-    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial 
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial,
+           COALESCE(CONCAT(a.nombre_autor, ' ', a.apellido_autor), 'Sin autor') AS autor
     FROM libros l
     LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
     LEFT JOIN editoriales e ON l.nit_editorial = e.nit
+    LEFT JOIN autores_libro al ON l.isbn = al.isbn
+    LEFT JOIN autores a ON al.id_autor = a.id_autor
     WHERE l.isbn = _isbn;
 END $$
 
@@ -643,6 +649,7 @@ CREATE OR REPLACE VIEW vw_lista_libros AS
 SELECT 
     l.isbn AS 'isbn',
     l.titulo AS 'título',
+    COALESCE(CONCAT(a.nombre_autor, ' ', a.apellido_autor), 'Sin autor') AS 'autor',
     l.fecha_publicacion AS 'fecha de publicación',
     l.precio AS 'precio',
     l.stock_actual AS 'stock',
@@ -650,7 +657,9 @@ SELECT
     e.nombre_editorial AS 'editorial'
 FROM libros l
 LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
-LEFT JOIN editoriales e ON l.nit_editorial = e.nit;
+LEFT JOIN editoriales e ON l.nit_editorial = e.nit
+LEFT JOIN autores_libro al ON l.isbn = al.isbn
+LEFT JOIN autores a ON al.id_autor = a.id_autor;
 
 CREATE OR REPLACE VIEW vw_lista_autores_libro AS
 SELECT 
