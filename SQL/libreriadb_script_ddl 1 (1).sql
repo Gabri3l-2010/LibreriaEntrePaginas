@@ -200,7 +200,7 @@ END $$
 DROP PROCEDURE IF EXISTS sp_insertarcategoria $$
 CREATE PROCEDURE sp_insertarcategoria(IN _nombre_categoria VARCHAR(100))
 BEGIN
-    INSERT IGNORE INTO categorias(nombre_categoria) VALUES (_nombre_categoria);
+    INSERT INTO categorias(nombre_categoria) VALUES (_nombre_categoria);
 END $$
 
 DROP PROCEDURE IF EXISTS sp_listarcategorias $$
@@ -236,7 +236,7 @@ CREATE PROCEDURE sp_insertareditorial(
     IN _direccion_editorial VARCHAR(100)
 )
 BEGIN
-    INSERT IGNORE INTO editoriales(nit, nombre_editorial, telefono_editorial, direccion_editorial) 
+    INSERT INTO editoriales(nit, nombre_editorial, telefono_editorial, direccion_editorial) 
     VALUES (_nit, _nombre_editorial, _telefono_editorial, _direccion_editorial);
 END $$
 
@@ -282,7 +282,7 @@ CREATE PROCEDURE sp_insertarautor(
     IN _biografia TEXT
 )
 BEGIN
-    INSERT IGNORE INTO autores(nombre_autor, apellido_autor, nacionalidad, biografia) 
+    INSERT INTO autores(nombre_autor, apellido_autor, nacionalidad, biografia) 
     VALUES (_nombre_autor, _apellido_autor, _nacionalidad, _biografia);
 END $$
 
@@ -330,7 +330,7 @@ CREATE PROCEDURE sp_insertarcliente(
     IN _correo_electronico VARCHAR(100)
 )
 BEGIN
-    INSERT IGNORE INTO clientes(cui, nombre_cliente, apellido_cliente, correo_electronico) 
+    INSERT INTO clientes(cui, nombre_cliente, apellido_cliente, correo_electronico) 
     VALUES (_cui, _nombre_cliente, _apellido_cliente, _correo_electronico);
 END $$
 
@@ -381,7 +381,7 @@ CREATE PROCEDURE sp_insertarlibro(
     IN _activo BOOLEAN
 )
 BEGIN
-    INSERT IGNORE INTO libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo) 
+    INSERT INTO libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo) 
     VALUES (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial, IFNULL(_stock_actual, 50), IFNULL(_stock_minimo, 5), IFNULL(_activo, TRUE));
 END $$
 
@@ -448,7 +448,7 @@ CREATE PROCEDURE sp_insertarautorlibro(
     IN _isbn VARCHAR(20)
 )
 BEGIN
-    INSERT IGNORE INTO autores_libro(id_autor, isbn) VALUES (_id_autor, _isbn);
+    INSERT INTO autores_libro(id_autor, isbn) VALUES (_id_autor, _isbn);
 END $$
 
 -- PROCEDIMIENTOS DE VENTAS Y REPORTES
