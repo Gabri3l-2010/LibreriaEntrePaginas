@@ -125,6 +125,7 @@ ALTER TABLE detalle_venta
 ADD CONSTRAINT fk_dv_venta FOREIGN KEY (id_venta) REFERENCES ventas(id_venta) ON DELETE CASCADE,
 ADD CONSTRAINT fk_dv_libros FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE;
 
+-- T3.4.4 (D1): Verificar relaciones con categorías y editoriales
 ALTER TABLE libros
 ADD CONSTRAINT fk_l_categorias FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria) ON DELETE CASCADE,
 ADD CONSTRAINT fk_l_editoriales FOREIGN KEY (nit_editorial) REFERENCES editoriales(nit) ON DELETE CASCADE;
