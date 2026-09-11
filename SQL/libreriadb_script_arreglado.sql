@@ -232,18 +232,18 @@ DELIMITER ;
 -- =============================================================================
 
 -- Usuario inicial necesario para registrar las ventas
-INSERT INTO usuarios (username, password_hash, rol, nombre, apellido) 
+INSERT IGNORE INTO usuarios (username, password_hash, rol, nombre, apellido) 
 VALUES ('admin_caja', 'hash123', 'admin', 'Administrador', 'Sistema');
 
 -- CATEGORÍAS INICIALES
-INSERT INTO categorias (nombre_categoria) VALUES
+INSERT IGNORE INTO categorias (nombre_categoria) VALUES
 ('Ficción Cósmica'), ('Fantasía Épica'), ('Ciencia Ficción'), ('Novela Negra'), ('Misterio'),
 ('Biografía'), ('Historia Universal'), ('Poesía Contemporánea'), ('Romance'), ('Terror Psicológico'),
 ('Autoayuda'), ('Desarrollo Personal'), ('Filosofía'), ('Arte Moderno'), ('Religión y Espiritualidad'),
 ('Cuentos Infantiles'), ('Literatura Juvenil'), ('Cómics y Manga'), ('Gastronomía'), ('Crónicas de Viajes');
  
 -- EDITORIALES INICIALES
-INSERT INTO editoriales (nit, nombre_editorial, telefono_editorial, direccion_editorial) VALUES
+INSERT IGNORE INTO editoriales (nit, nombre_editorial, telefono_editorial, direccion_editorial) VALUES
 ('1001-A', 'Editorial Planeta', '22334455', 'Zona 1, Ciudad'),
 ('1002-B', 'Penguin Random House', '22334456', 'Zona 10, Ciudad'),
 ('1003-C', 'Editorial Santillana', '22334457', 'Zona 9, Ciudad'),
@@ -266,7 +266,7 @@ INSERT INTO editoriales (nit, nombre_editorial, telefono_editorial, direccion_ed
 ('1020-T', 'Fondo de Cultura Económica', '22334474', 'Zona 9, Ciudad');
  
 -- AUTORES INICIALES
-INSERT INTO autores (nombre_autor, apellido_autor, nacionalidad, biografia) VALUES
+INSERT IGNORE INTO autores (nombre_autor, apellido_autor, nacionalidad, biografia) VALUES
 ('Gabriel', 'García Márquez', 'Colombiana', 'Premio Nobel de Literatura 1982. Exponente del realismo mágico.'),
 ('Julio', 'Cortázar', 'Argentina', 'Maestro del relato corto y creador de Rayuela.'),
 ('Isabel', 'Allende', 'Chilena', 'Autora de La Casa de los Espíritus. Gran exponente latinoamericana.'),
@@ -289,7 +289,7 @@ INSERT INTO autores (nombre_autor, apellido_autor, nacionalidad, biografia) VALU
 ('Margaret', 'Atwood', 'Canadiense', 'Autora de El cuento de la criada, fuerte exponente distópica.');
  
 -- CLIENTES INICIALES
-INSERT INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) VALUES
+INSERT IGNORE INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) VALUES
 (2000100010101, 'Ana', 'López', 'ana.l@gmail.com'),
 (2000100020101, 'Carlos', 'Méndez', 'cmendez@yahoo.com'),
 (2000100030101, 'Luis', 'Pérez', 'lperez@hotmail.com'),
@@ -312,7 +312,7 @@ INSERT INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico)
 (2000100200101, 'Mónica', 'Herrera', 'mherrera@gmail.com');
  
 -- LIBROS INICIALES
-INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial) VALUES
+INSERT IGNORE INTO libros (isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial) VALUES
 ('978-0-123', 'Cien Años de Soledad', '1967-05-30', 150.00, 1, '1001-A'),
 ('978-0-124', 'Rayuela', '1963-06-28', 135.50, 1, '1002-B'),
 ('978-0-125', 'El Señor Presidente', '1946-01-01', 120.00, 1, '1019-S'),
@@ -327,7 +327,7 @@ INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, id_categoria, nit_e
 ('978-0-134', 'El Cuento de la Criada', '1985-01-01', 160.00, 3, '1004-D');
 
 -- AUTORES LIBRO INICIALES
-INSERT INTO autores_libro (id_autor, isbn) VALUES
+INSERT IGNORE INTO autores_libro (id_autor, isbn) VALUES
 (1, '978-0-123'), (2, '978-0-124'), (5, '978-0-125'), (6, '978-0-126'), (8, '978-0-127'),  
 (13, '978-0-128'), (14, '978-0-129'), (16, '978-0-130'), (12, '978-0-131'), (10, '978-0-132'), 
 (3, '978-0-133'), (20, '978-0-134');

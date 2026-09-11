@@ -33,7 +33,7 @@ CALL sp_insertarcategoria('Literatura Gótica');
 -- =============================================================================
 -- 3. EDITORIALES INICIALES (1001-A al 1040-NN)
 -- =============================================================================
-INSERT INTO editoriales (nit, nombre_editorial, telefono_editorial, direccion_editorial) VALUES
+INSERT IGNORE INTO editoriales (nit, nombre_editorial, telefono_editorial, direccion_editorial) VALUES
 ('1001-A', 'Editorial Planeta', '22334455', 'Zona 1, Ciudad'),
 ('1002-B', 'Penguin Random House', '22334456', 'Zona 10, Ciudad'),
 ('1003-C', 'Editorial Santillana', '22334457', 'Zona 9, Ciudad'),
