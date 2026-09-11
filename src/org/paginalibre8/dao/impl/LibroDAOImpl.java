@@ -10,8 +10,15 @@ import java.util.List;
 import org.paginalibre8.model.Libro;
 import org.paginalibre8.util.Conexion;
 
+/**
+ * Implementación DAO para la gestión de la entidad Libro en la base de datos.
+ * Utiliza llamadas a procedimientos almacenados.
+ */
 public class LibroDAOImpl implements LibroDAO {
 
+    /**
+     * Mapea una fila del ResultSet a un objeto Libro.
+     */
     private Libro mapearLibro(ResultSet rs) throws SQLException {
         Libro l = new Libro();
         l.setIsbn(rs.getString("isbn"));
