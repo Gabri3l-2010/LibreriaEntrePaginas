@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="640.0" prefWidth="920.0" stylesheets="@menuprincipaldashboardview.css"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.paginalibre8.controller.RegistrarSalidaInventarioController">
+    <top>
+        <VBox alignment="CENTER_LEFT" spacing="5" styleClass="header-box">
+            <padding><Insets top="20" right="25" bottom="15" left="25"/></padding>
+            <Label text="Registrar salida de inventario" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+            <Label text="Registra mermas, traslados o devoluciones. El stock se descuenta automáticamente."/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="18" style="-fx-padding: 30;">
+            <VBox spacing="15" style="-fx-background-color: #f8f9fa; -fx-padding: 22; -fx-background-radius: 8; -fx-border-color: #e9ecef; -fx-border-radius: 8;">
+                <Label text="Datos de la salida" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <GridPane hgap="15" vgap="15">
+                    <Label text="Libro:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <ComboBox fx:id="cmbLibro" promptText="Selecciona un libro" prefWidth="430" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label fx:id="lblStockActual" text="Stock disponible: —" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="Tipo de salida:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <ComboBox fx:id="cmbTipoSalida" promptText="Selecciona el tipo" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="Cantidad:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <TextField fx:id="txtCantidad" promptText="Ej. 5" prefWidth="160" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    <Label text="Observación / Motivo:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <TextArea fx:id="txtObservacion" promptText="Describe el motivo de la salida" prefRowCount="3" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                </GridPane>
+                <HBox spacing="10">
+                    <Button text="Registrar salida" onAction="#handleRegistrarSalida" styleClass="menu-button"/>
+                    <Button text="Limpiar" onAction="#handleLimpiar" styleClass="exit-button"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
