@@ -542,16 +542,24 @@ END $$
 DROP PROCEDURE IF EXISTS sp_buscar_libros_por_titulo $$
 CREATE PROCEDURE sp_buscar_libros_por_titulo(IN _titulo VARCHAR(100))
 BEGIN
-    SELECT l.*, l.stock_actual AS stock 
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial,
+           COALESCE(CONCAT(a.nombre_autor, ' ', a.apellido_autor), 'Sin autor') AS autor 
     FROM libros l 
+    LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
+    LEFT JOIN editoriales e ON l.nit_editorial = e.nit
+    LEFT JOIN autores_libro al ON l.isbn = al.isbn
+    LEFT JOIN autores a ON al.id_autor = a.id_autor
     WHERE LOWER(l.titulo) LIKE LOWER(CONCAT('%', _titulo, '%'));
 END $$
 
 DROP PROCEDURE IF EXISTS sp_buscar_libros_por_autor $$
 CREATE PROCEDURE sp_buscar_libros_por_autor(IN _autor VARCHAR(100))
 BEGIN
-    SELECT l.*, l.stock_actual AS stock, CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor 
+    SELECT l.*, l.stock_actual AS stock, c.nombre_categoria, e.nombre_editorial,
+           CONCAT(a.nombre_autor, ' ', a.apellido_autor) AS autor 
     FROM libros l 
+    LEFT JOIN categorias c ON l.id_categoria = c.id_categoria
+    LEFT JOIN editoriales e ON l.nit_editorial = e.nit
     JOIN autores_libro al ON l.isbn = al.isbn 
     JOIN autores a ON al.id_autor = a.id_autor 
     WHERE LOWER(CONCAT(a.nombre_autor, ' ', a.apellido_autor)) LIKE LOWER(CONCAT('%', _autor, '%'));
