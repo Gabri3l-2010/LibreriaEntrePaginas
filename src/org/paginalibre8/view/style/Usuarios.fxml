@@ -10,65 +10,65 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="1083.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre8.controller.UsuariosController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre8.controller.UsuariosController">
 
     <children>
 
-        <Label layoutX="350.0" layoutY="15.0" text="Gestión de Usuarios">
+        <Label layoutX="430.0" layoutY="15.0" text="Gestión de Usuarios">
             <font>
-                <Font name="System Bold" size="20.0" />
+                <Font name="System Bold" size="22.0" />
             </font>
         </Label>
 
         <!-- Campos del Formulario -->
 
-        <Label layoutX="30.0" layoutY="60.0" text="Usuario:" />
-        <TextField fx:id="txtUsername" layoutX="110.0" layoutY="55.0" prefWidth="180.0" promptText="Username" />
+        <Label layoutX="30.0" layoutY="65.0" text="Usuario:" />
+        <TextField fx:id="txtUsername" layoutX="120.0" layoutY="60.0" prefWidth="190.0" promptText="Username" />
 
-        <Label layoutX="30.0" layoutY="100.0" text="Contraseña:" />
-        <PasswordField fx:id="txtPassword" layoutX="110.0" layoutY="95.0" prefWidth="180.0" promptText="Mínimo 6 caracteres" />
+        <Label layoutX="30.0" layoutY="110.0" text="Contraseña:" />
+        <PasswordField fx:id="txtPassword" layoutX="120.0" layoutY="105.0" prefWidth="190.0" promptText="Mínimo 6 caracteres" />
 
-        <Label layoutX="30.0" layoutY="140.0" text="Confirmar:" />
-        <PasswordField fx:id="txtConfirmar" layoutX="110.0" layoutY="135.0" prefWidth="180.0" promptText="Repite la contraseña" />
+        <Label layoutX="30.0" layoutY="155.0" text="Confirmar:" />
+        <PasswordField fx:id="txtConfirmar" layoutX="120.0" layoutY="150.0" prefWidth="190.0" promptText="Repite la contraseña" />
 
-        <Label layoutX="30.0" layoutY="180.0" text="Rol:" />
-        <ComboBox fx:id="cmbRol" layoutX="110.0" layoutY="175.0" prefWidth="180.0" promptText="Seleccionar rol" />
+        <Label layoutX="30.0" layoutY="200.0" text="Rol:" />
+        <ComboBox fx:id="cmbRol" layoutX="120.0" layoutY="195.0" prefWidth="190.0" promptText="Seleccionar rol" />
 
-        <Label layoutX="30.0" layoutY="220.0" text="Nombre:" />
-        <TextField fx:id="txtNombre" layoutX="110.0" layoutY="215.0" prefWidth="180.0" promptText="Nombre" />
+        <Label layoutX="30.0" layoutY="245.0" text="Nombre:" />
+        <TextField fx:id="txtNombre" layoutX="120.0" layoutY="240.0" prefWidth="190.0" promptText="Nombre" />
 
-        <Label layoutX="30.0" layoutY="260.0" text="Apellido:" />
-        <TextField fx:id="txtApellido" layoutX="110.0" layoutY="255.0" prefWidth="180.0" promptText="Apellido" />
+        <Label layoutX="30.0" layoutY="290.0" text="Apellido:" />
+        <TextField fx:id="txtApellido" layoutX="120.0" layoutY="285.0" prefWidth="190.0" promptText="Apellido" />
 
-        <Label layoutX="30.0" layoutY="300.0" text="Correo:" />
-        <TextField fx:id="txtCorreo" layoutX="110.0" layoutY="295.0" prefWidth="180.0" promptText="ejemplo@correo.com" />
+        <Label layoutX="30.0" layoutY="335.0" text="Correo:" />
+        <TextField fx:id="txtCorreo" layoutX="120.0" layoutY="330.0" prefWidth="190.0" promptText="ejemplo@correo.com" />
 
         <!-- COMBOBOX DE ESTADO (Activo / Inactivo) -->
-        <Label layoutX="30.0" layoutY="340.0" text="Estado:" />
-        <ComboBox fx:id="cmbEstado" layoutX="110.0" layoutY="335.0" prefWidth="180.0" promptText="Seleccionar Estado" />
+        <Label layoutX="30.0" layoutY="380.0" text="Estado:" />
+        <ComboBox fx:id="cmbEstado" layoutX="120.0" layoutY="375.0" prefWidth="190.0" promptText="Seleccionar Estado" />
 
         <!-- Botones -->
 
-        <Button layoutX="16.0" layoutY="390.0" mnemonicParsing="false" onAction="#guardarUsuario" prefHeight="35.0" prefWidth="120.0" text="Guardar" />
+        <Button layoutX="20.0" layoutY="440.0" mnemonicParsing="false" onAction="#guardarUsuario" prefHeight="38.0" prefWidth="135.0" text="Guardar" />
 
-        <Button layoutX="157.0" layoutY="390.0" mnemonicParsing="false" onAction="#modificarUsuario" prefHeight="35.0" prefWidth="120.0" text="Modificar" />
+        <Button layoutX="170.0" layoutY="440.0" mnemonicParsing="false" onAction="#modificarUsuario" prefHeight="38.0" prefWidth="135.0" text="Modificar" />
 
-        <Button layoutX="16.0" layoutY="438.0" mnemonicParsing="false" onAction="#eliminarUsuario" prefHeight="35.0" prefWidth="120.0" text="Eliminar" />
+        <Button layoutX="20.0" layoutY="492.0" mnemonicParsing="false" onAction="#eliminarUsuario" prefHeight="38.0" prefWidth="135.0" text="Eliminar" />
 
-        <Button layoutX="157.0" layoutY="438.0" mnemonicParsing="false" onAction="#limpiarCampos" prefHeight="35.0" prefWidth="120.0" text="Limpiar" />
+        <Button layoutX="170.0" layoutY="492.0" mnemonicParsing="false" onAction="#limpiarCampos" prefHeight="38.0" prefWidth="135.0" text="Limpiar" />
 
         <!-- Tabla de Usuarios -->
 
-        <TableView fx:id="tblUsuarios" editable="true" layoutX="320.0" layoutY="55.0" prefHeight="410.0" prefWidth="700.0">
+        <TableView fx:id="tblUsuarios" editable="true" layoutX="330.0" layoutY="50.0" prefHeight="540.0" prefWidth="850.0">
 
             <columns>
-                <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
-                <TableColumn fx:id="colNombre" prefWidth="110.0" text="Nombre" />
-                <TableColumn fx:id="colApellido" prefWidth="110.0" text="Apellido" />
-                <TableColumn fx:id="colUsuario" prefWidth="110.0" text="Usuario" />
-                <TableColumn fx:id="colCorreo" prefWidth="140.0" text="Correo" />
-                <TableColumn fx:id="colRol1" prefWidth="90.0" text="Rol" />
-                <TableColumn fx:id="colEstado" prefWidth="90.0" text="Estado" />
+                <TableColumn fx:id="colId" prefWidth="55.0" text="ID" />
+                <TableColumn fx:id="colNombre" prefWidth="145.0" text="Nombre" />
+                <TableColumn fx:id="colApellido" prefWidth="145.0" text="Apellido" />
+                <TableColumn fx:id="colUsuario" prefWidth="145.0" text="Usuario" />
+                <TableColumn fx:id="colCorreo" prefWidth="175.0" text="Correo" />
+                <TableColumn fx:id="colRol1" prefWidth="100.0" text="Rol" />
+                <TableColumn fx:id="colEstado" prefWidth="85.0" text="Estado" />
             </columns>
 
         </TableView>
