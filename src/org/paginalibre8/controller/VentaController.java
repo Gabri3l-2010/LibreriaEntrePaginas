@@ -2,6 +2,8 @@ package org.paginalibre8.controller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,6 +20,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Duration;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.paginalibre8.dao.impl.LibroDAO;
@@ -29,6 +32,7 @@ import org.paginalibre8.model.Libro;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.model.Venta;
 import org.paginalibre8.servicio.SesionUsuario;
+import java.util.List;
 
 public class VentaController implements Initializable {
 
@@ -45,6 +49,7 @@ public class VentaController implements Initializable {
     @FXML private TableColumn<DetalleVenta, Double> colSubtotal;
 
     @FXML private Label lblTotal;
+    @FXML private Label lblTotalHoy;
 
     private final LibroDAO libroDAO = new LibroDAOImpl();
     private final VentaDAO ventaDAO = new VentaDAOImpl();
@@ -57,6 +62,11 @@ public class VentaController implements Initializable {
         if (txtNitCliente != null) {
             txtNitCliente.setText("C/F");
         }
+        
+        actualizarTotalHoy();
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(30), e -> actualizarTotalHoy()));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     private void configurarTablaCarrito() {
@@ -155,6 +165,17 @@ public class VentaController implements Initializable {
             lblTotal.setText(String.format("Q %.2f", sumaTotal));
         }
     }
+
+    private void actualizarTotalHoy() {
+        List<Venta> ventas = ventaDAO.obtenerVentasDelDia();
+        double total = 0;
+        if (ventas != null) {
+            for (Venta v : ventas) total += v.getTotal();
+        }
+        if (lblTotalHoy != null) {
+            lblTotalHoy.setText(String.format("Q %.2f", total));
+        }
+    }
     @FXML
     private void handleProcesarVenta(ActionEvent event) {
         if (carritoList.isEmpty()) {
@@ -210,6 +231,7 @@ public class VentaController implements Initializable {
             txtNombreCliente.clear();
             txtIsbn.clear();
             calcularTotal();
+            actualizarTotalHoy();
         } else {
             mostrarError("Error en Transacción", "No fue posible procesar la venta. Se ha revertido la operación (Rollback).");
         }

@@ -70,6 +70,10 @@
                 
                 <!-- Resumen de Totales -->
                 <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: #eef2f7; -fx-padding: 12; -fx-background-radius: 6;">
+                    <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label text="Total vendido hoy:" style="-fx-font-weight: bold; -fx-font-size: 13px;" />
+                        <Label fx:id="lblTotalHoy" text="Q 0.00" style="-fx-font-size: 15px; -fx-text-fill: #27ae60; -fx-font-weight: bold;" />
+                    </VBox>
                     <Label text="Total a Pagar:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
                     <Label fx:id="lblTotal" text="Q 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2b579a;"/>
                     <Button fx:id="btnProcesarVenta" text="Registrar Venta" onAction="#handleProcesarVenta" styleClass="menu-button"/>

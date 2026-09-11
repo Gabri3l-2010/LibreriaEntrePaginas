@@ -1,7 +1,5 @@
 package org.paginalibre8.controller;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -9,13 +7,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.util.Duration;
 import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.dao.impl.UsuarioDAOImpl;
-import org.paginalibre8.dao.impl.VentaDAO;
-import org.paginalibre8.dao.impl.VentaDAOImpl;
 import org.paginalibre8.model.Usuario;
-import org.paginalibre8.model.Venta;
 import org.paginalibre8.util.SecurityUtil;
 
 import java.net.URL;
@@ -42,7 +36,6 @@ public class UsuariosController implements Initializable {
     @FXML private TableColumn<Usuario, String> colRol1;
     @FXML private TableColumn<Usuario, String> colEstado;
     @FXML private TableColumn<Usuario, Void> colAccion;
-    @FXML private Label lblTotalHoy;
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
     private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
@@ -66,11 +59,6 @@ public class UsuariosController implements Initializable {
         });
 
         cargarDatosDesdeBD();
-        actualizarTotalHoy();
-
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(30), e -> actualizarTotalHoy()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
 
         tblUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
@@ -241,18 +229,6 @@ public class UsuariosController implements Initializable {
             case "bodega" -> "Bodega";
             default -> rolBD;
         };
-    }
-
-    private void actualizarTotalHoy() {
-        VentaDAO ventaDAO = new VentaDAOImpl();
-        List<Venta> ventas = ventaDAO.obtenerVentasDelDia();
-        double total = 0;
-        if (ventas != null) {
-            for (Venta v : ventas) total += v.getTotal();
-        }
-        if (lblTotalHoy != null) {
-            lblTotalHoy.setText(String.format("Q %.2f", total));
-        }
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
