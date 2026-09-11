@@ -57,6 +57,8 @@
 
         <Button layoutX="170.0" layoutY="492.0" mnemonicParsing="false" onAction="#limpiarCampos" prefHeight="38.0" prefWidth="135.0" text="Limpiar" />
 
+        <Button layoutX="20.0" layoutY="550.0" mnemonicParsing="false" onAction="#verVentasDelDia" prefHeight="38.0" prefWidth="285.0" text="Ventas del día de hoy" />
+
         <!-- Tabla de Usuarios -->
 
         <TableView fx:id="tblUsuarios" editable="true" layoutX="330.0" layoutY="50.0" prefHeight="540.0" prefWidth="850.0">

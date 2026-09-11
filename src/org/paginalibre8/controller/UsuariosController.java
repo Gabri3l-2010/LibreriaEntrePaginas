@@ -9,10 +9,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.paginalibre8.dao.impl.UsuarioDAO;
 import org.paginalibre8.dao.impl.UsuarioDAOImpl;
+import org.paginalibre8.dao.impl.VentaDAO;
+import org.paginalibre8.dao.impl.VentaDAOImpl;
 import org.paginalibre8.model.Usuario;
+import org.paginalibre8.model.Venta;
 import org.paginalibre8.util.SecurityUtil;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -229,6 +233,32 @@ public class UsuariosController implements Initializable {
             case "bodega" -> "Bodega";
             default -> rolBD;
         };
+    }
+
+    @FXML
+    private void verVentasDelDia() {
+        VentaDAO ventaDAO = new VentaDAOImpl();
+        List<Venta> ventas = ventaDAO.obtenerVentasDelDia();
+
+        if (ventas == null || ventas.isEmpty()) {
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Ventas de hoy", "No hay ventas registradas para el día de hoy.");
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        double total = 0;
+        for (Venta v : ventas) {
+            sb.append("• Venta #").append(v.getId())
+              .append(" | Cliente: ").append(v.getNitCliente())
+              .append(" | Total: Q").append(String.format("%.2f", v.getTotal()))
+              .append("\n");
+            total += v.getTotal();
+        }
+        sb.append("\n─────────────────────────");
+        sb.append("\nTotal del día: Q").append(String.format("%.2f", total));
+
+        mostrarAlerta(Alert.AlertType.INFORMATION,
+                "Ventas del día - " + LocalDate.now(), sb.toString());
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
