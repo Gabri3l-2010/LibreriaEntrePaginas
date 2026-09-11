@@ -56,6 +56,15 @@ public class DashboardBodegaController implements Initializable, DashboardContro
     }
 
     @FXML
+    private void handleSalidaInventario() {
+        if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
+            mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar el inventario.");
+            return;
+        }
+        cargarVista("/org/paginalibre8/view/style/RegistrarSalidaInventarioView.fxml");
+    }
+
+    @FXML
     private void handleCategorias() {
         if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar categorías.");

@@ -21,7 +21,8 @@
             <Label fx:id="lblUsuario" text="Bodega" style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
             
             <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS">
-                <Button fx:id="btnInventario" text="Gestión de Inventario" onAction="#handleInventario" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
+                <Button fx:id="btnInventario" text="Ingreso de Inventario" onAction="#handleInventario" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
+                <Button fx:id="btnSalidaInventario" text="Salida de Inventario" onAction="#handleSalidaInventario" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
                 <Button fx:id="btnCategorias" text="Categorías y Libros" onAction="#handleCategorias" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
                 <Button fx:id="btnCambiarPassword" text="Cambiar Contraseña" onAction="#handleCambiarPassword" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
             </VBox>
