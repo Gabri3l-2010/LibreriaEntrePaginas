@@ -51,6 +51,18 @@ public class LibroDAOImpl implements LibroDAO {
         }
 
         try {
+            l.setStockMinimo(rs.getInt("stock_minimo"));
+        } catch (SQLException ignored) {
+            l.setStockMinimo(5);
+        }
+
+        try {
+            l.setActivo(rs.getBoolean("activo"));
+        } catch (SQLException ignored) {
+            l.setActivo(true);
+        }
+
+        try {
             l.setIdCategoria(rs.getInt("id_categoria"));
         } catch (SQLException ignored) {}
 
@@ -87,7 +99,7 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean crear(Libro libro) {
-        String consulta = "{call sp_insertarlibro(?, ?, ?, ?, ?, ?)}";
+        String consulta = "{call sp_insertarlibro(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement consultaCall = conexion.prepareCall(consulta)) {
             consultaCall.setString(1, libro.getIsbn());
@@ -96,6 +108,9 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setDouble(4, libro.getPrecio());
             consultaCall.setInt(5, libro.getIdCategoria());
             consultaCall.setString(6, libro.getNitEditorial());
+            consultaCall.setInt(7, libro.getStock());
+            consultaCall.setInt(8, libro.getStockMinimo());
+            consultaCall.setBoolean(9, libro.isActivo());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al crear Libro: " + e.getMessage());
@@ -175,7 +190,7 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean actualizar(Libro libro) {
-        String consulta = "{call sp_actualizarlibro(?, ?, ?, ?, ?, ?)}";
+        String consulta = "{call sp_actualizarlibro(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement consultaCall = conexion.prepareCall(consulta)) {
             consultaCall.setString(1, libro.getIsbn());
@@ -184,6 +199,9 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setDouble(4, libro.getPrecio());
             consultaCall.setInt(5, libro.getIdCategoria());
             consultaCall.setString(6, libro.getNitEditorial());
+            consultaCall.setInt(7, libro.getStock());
+            consultaCall.setInt(8, libro.getStockMinimo());
+            consultaCall.setBoolean(9, libro.isActivo());
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar Libro: " + e.getMessage());
