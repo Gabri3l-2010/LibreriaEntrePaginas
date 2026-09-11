@@ -204,6 +204,12 @@ CALL sp_insertarautorlibro(25, '978-0-139');
 -- =============================================================================
 -- 8. VENTAS Y DETALLES DE VENTA INICIALES
 -- =============================================================================
+
+-- Usuario inicial requerido para registrar ventas
+INSERT INTO usuarios (username, password_hash, rol, nombre, apellido, correo)
+VALUES ('admin', SHA2('admin123', 256), 'admin', 'Administrador', 'Sistema', 'admin@libreria.com')
+ON DUPLICATE KEY UPDATE username = username;
+
 INSERT INTO ventas (fecha_venta, subtotal, total, cui_cliente, id_usuario, estado) VALUES
 (NOW(), 330.00, 330.00, 2000100010101, (SELECT id_usuario FROM usuarios LIMIT 1), 'COMPLETADA'),
 (NOW(), 135.50, 135.50, 2000100020101, (SELECT id_usuario FROM usuarios LIMIT 1), 'COMPLETADA'),
