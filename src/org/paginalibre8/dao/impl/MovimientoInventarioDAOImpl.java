@@ -64,6 +64,60 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
     }
 
     @Override
+    public boolean registrarIngresoTransaccional(MovimientoInventario movimiento) {
+        Connection conexion = null;
+        try {
+            conexion = Conexion.getInstancia().conectar();
+            conexion.setAutoCommit(false);
+
+            // 1. Incrementar stock_actual del libro
+            String sqlStock = "UPDATE libros SET stock_actual = stock_actual + ? WHERE isbn = ?";
+            try (PreparedStatement psStock = conexion.prepareStatement(sqlStock)) {
+                psStock.setInt(1, movimiento.getCantidad());
+                psStock.setString(2, movimiento.getIsbn());
+                int filasStock = psStock.executeUpdate();
+                if (filasStock == 0) {
+                    conexion.rollback();
+                    return false;
+                }
+            }
+
+            // 2. Registrar el movimiento en movimientos_inventario
+            String sqlMov = "INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement psMov = conexion.prepareStatement(sqlMov)) {
+                psMov.setString(1, movimiento.getIsbn());
+                psMov.setString(2, movimiento.getTipoMovimiento() != null ? movimiento.getTipoMovimiento() : "INGRESO");
+                psMov.setInt(3, movimiento.getCantidad());
+                psMov.setInt(4, movimiento.getIdUsuario());
+                psMov.setString(5, movimiento.getObservacion());
+                psMov.executeUpdate();
+            }
+
+            conexion.commit();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error en transacción de ingreso de inventario: " + e.getMessage());
+            if (conexion != null) {
+                try {
+                    conexion.rollback();
+                } catch (SQLException ex) {
+                    System.err.println("Error al hacer rollback: " + ex.getMessage());
+                }
+            }
+            return false;
+        } finally {
+            if (conexion != null) {
+                try {
+                    conexion.setAutoCommit(true);
+                    conexion.close();
+                } catch (SQLException e) {
+                    System.err.println("Error al cerrar conexión: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
     public List<MovimientoInventario> listarMovimientos() {
         List<MovimientoInventario> lista = new ArrayList<>();
         String sql = "SELECT m.*, l.titulo AS titulo_libro, u.username AS username_usuario "
