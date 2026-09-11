@@ -175,16 +175,16 @@ INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, stock_actual, stock
 ('978-0-133', 'La Casa de los Espíritus', '1982-01-01', 145.00, 35, 5, 1, '1001-A'),
 ('978-0-134', 'El Cuento de la Criada', '1985-01-01', 160.00, 30, 5, 3, '1004-D');
 
-CALL sp_insertarlibro('978-0-135', 'El Viejo y el Mar', '1952-09-01', 115.00, 21, '1021-U');
-CALL sp_insertarlibro('978-0-136', 'Crónicas de un Destino', '2015-06-12', 140.00, 22, '1022-V');
-CALL sp_insertarlibro('978-0-137', 'El Extranjero', '1942-05-15', 95.00, 23, '1023-W');
-CALL sp_insertarlibro('978-0-138', 'Los Hermanos Karamazov', '1880-11-01', 190.00, 21, '1024-X');
-CALL sp_insertarlibro('978-0-139', 'Estudio en Escarlata', '1887-11-01', 85.00, 24, '1025-Y');
-CALL sp_insertarlibro('978-0-140', 'El horror de Dunwich', '1929-04-01', 110.00, 40, '1026-Z');
-CALL sp_insertarlibro('978-0-141', 'El segundo sexo', '1949-06-01', 175.00, 26, '1027-AA');
-CALL sp_insertarlibro('978-0-142', 'Crónicas Marcianas', '1950-05-01', 130.00, 25, '1028-BB');
-CALL sp_insertarlibro('978-0-143', 'Un Mundo Feliz', '1932-02-01', 125.00, 24, '1029-CC');
-CALL sp_insertarlibro('978-0-144', '1984', '1949-06-08', 145.00, 24, '1030-DD');
+CALL sp_insertarlibro('978-0-135', 'El Viejo y el Mar', '1952-09-01', 115.00, 21, '1021-U', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-136', 'Crónicas de un Destino', '2015-06-12', 140.00, 22, '1022-V', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-137', 'El Extranjero', '1942-05-15', 95.00, 23, '1023-W', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-138', 'Los Hermanos Karamazov', '1880-11-01', 190.00, 21, '1024-X', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-139', 'Estudio en Escarlata', '1887-11-01', 85.00, 24, '1025-Y', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-140', 'El horror de Dunwich', '1929-04-01', 110.00, 40, '1026-Z', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-141', 'El segundo sexo', '1949-06-01', 175.00, 26, '1027-AA', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-142', 'Crónicas Marcianas', '1950-05-01', 130.00, 25, '1028-BB', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-143', 'Un Mundo Feliz', '1932-02-01', 125.00, 24, '1029-CC', 50, 5, TRUE);
+CALL sp_insertarlibro('978-0-144', '1984', '1949-06-08', 145.00, 24, '1030-DD', 50, 5, TRUE);
 
 -- =============================================================================
 -- 7. AUTORES LIBRO (RELACIÓN AUTOR - LIBRO)
