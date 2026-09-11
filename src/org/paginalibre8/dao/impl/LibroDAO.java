@@ -13,4 +13,5 @@ public interface LibroDAO {
     boolean actualizar(Libro libro);
     boolean eliminar(String isbn);
     int getStockDisponible(String isbn);
+    List<Libro> obtenerLibrosConStockCritico();
 }

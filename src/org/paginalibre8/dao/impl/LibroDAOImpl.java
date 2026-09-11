@@ -239,4 +239,25 @@ public class LibroDAOImpl implements LibroDAO {
         }
         return 0;
     }
+
+    @Override
+    public List<Libro> obtenerLibrosConStockCritico() {
+        List<Libro> libros = new ArrayList<>();
+        String sql = "SELECT isbn, titulo, stock_actual, stock_minimo FROM libros WHERE stock_actual <= stock_minimo";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             java.sql.PreparedStatement ps = conexion.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Libro l = new Libro();
+                l.setIsbn(rs.getString("isbn"));
+                l.setTitulo(rs.getString("titulo"));
+                l.setStock(rs.getInt("stock_actual"));
+                l.setStockMinimo(rs.getInt("stock_minimo"));
+                libros.add(l);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener libros con stock critico: " + e.getMessage());
+        }
+        return libros;
+    }
 }
