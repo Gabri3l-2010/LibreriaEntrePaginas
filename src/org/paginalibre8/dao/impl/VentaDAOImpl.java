@@ -15,7 +15,7 @@ public class VentaDAOImpl implements VentaDAO {
     @Override
     public int registrarVenta(Venta venta) {
         if (venta == null) return -1;
-        
+
         String sqlProc = "{call sp_insertarventa(?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement call = conexion.prepareCall(sqlProc)) {
@@ -134,7 +134,10 @@ public class VentaDAOImpl implements VentaDAO {
                 }
             }
 
-            String sqlDetalle = "{call sp_insertardetalleventa(?, ?)}";
+            // FIX: sp_insertardetalleventa ahora recibe también cantidad y
+            // precio_unitario, en vez de forzar cantidad = 1 y recalcular el
+            // precio desde la tabla libros.
+            String sqlDetalle = "{call sp_insertardetalleventa(?, ?, ?, ?)}";
             String sqlStock = "{call sp_actualizar_stock_libro(?, ?)}";
 
             try (CallableStatement csDetalle = conexion.prepareCall(sqlDetalle);
@@ -142,9 +145,11 @@ public class VentaDAOImpl implements VentaDAO {
 
                 for (DetalleVenta d : venta.getDetalles()) {
                     d.setIdVenta(idVentaGenerado);
-                    
+
                     csDetalle.setInt(1, idVentaGenerado);
                     csDetalle.setString(2, d.getIsbnLibro());
+                    csDetalle.setInt(3, d.getCantidad());
+                    csDetalle.setDouble(4, d.getPrecioUnitario());
                     csDetalle.execute();
 
                     csStock.setString(1, d.getIsbnLibro());
