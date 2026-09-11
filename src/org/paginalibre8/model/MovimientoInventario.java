@@ -3,9 +3,17 @@ package org.paginalibre8.model;
 import java.sql.Timestamp;
 
 public class MovimientoInventario {
+
+    public static final String TIPO_INGRESO   = "INGRESO";
+    public static final String TIPO_VENTA     = "VENTA";
+    public static final String TIPO_MERMA     = "MERMA";
+    public static final String TIPO_TRASLADO  = "TRASLADO";
+    public static final String TIPO_DEVOLUCION = "DEVOLUCION";
+    public static final String TIPO_AJUSTE    = "AJUSTE";
+
     private int idMovimiento;
     private String isbn;
-    private String tipoMovimiento; // INGRESO, VENTA, MERMA, TRASLADO, DEVOLUCION, AJUSTE
+    private String tipoMovimiento;
     private int cantidad;
     private Timestamp fechaMovimiento;
     private int idUsuario;
