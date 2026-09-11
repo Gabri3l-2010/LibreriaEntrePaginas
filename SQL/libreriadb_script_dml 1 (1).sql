@@ -1,4 +1,3 @@
--- IMPORTANTE: Ejecutar el DDL primero antes que este script
 USE libreriadb_in4cm;
 
 -- =============================================================================
@@ -205,7 +204,6 @@ CALL sp_insertarautorlibro(25, '978-0-139');
 -- 8. VENTAS Y DETALLES DE VENTA INICIALES
 -- =============================================================================
 
--- Usuario inicial requerido para registrar ventas
 INSERT INTO usuarios (username, password_hash, rol, nombre, apellido, correo)
 VALUES ('admin', SHA2('admin123', 256), 'admin', 'Administrador', 'Sistema', 'admin@libreria.com')
 ON DUPLICATE KEY UPDATE username = username;

@@ -46,7 +46,6 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
             return call.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al registrar movimiento con procedimiento almacenado: " + e.getMessage());
-            // Fallback con SQL directo por resiliencia
             String sql = "INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES (?, ?, ?, ?, ?)";
             try (Connection conexion = Conexion.getInstancia().conectar();
                  PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -75,7 +74,6 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
             conexion = Conexion.getInstancia().conectar();
             conexion.setAutoCommit(false);
 
-            // 1. Incrementar stock_actual del libro
             String sqlStock = "UPDATE libros SET stock_actual = stock_actual + ? WHERE isbn = ?";
             try (PreparedStatement psStock = conexion.prepareStatement(sqlStock)) {
                 psStock.setInt(1, movimiento.getCantidad());
@@ -87,7 +85,6 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
                 }
             }
 
-            // 2. Registrar el movimiento en movimientos_inventario
             String sqlMov = "INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement psMov = conexion.prepareStatement(sqlMov)) {
                 psMov.setString(1, movimiento.getIsbn());

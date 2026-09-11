@@ -20,7 +20,6 @@ import org.paginalibre8.model.Libro;
 import org.paginalibre8.model.MovimientoInventario;
 import org.paginalibre8.servicio.SesionUsuario;
 
-/** Registra entradas de inventario sin permitir modificar el stock directamente. */
 public class RegistrarIngresoInventarioController implements Initializable {
 
     @FXML private ComboBox<Libro> cmbLibro;
