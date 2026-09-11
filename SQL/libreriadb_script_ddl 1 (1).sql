@@ -374,11 +374,14 @@ CREATE PROCEDURE sp_insertarlibro(
     IN _fecha_publicacion DATE,
     IN _precio DECIMAL(10,2),
     IN _id_categoria INT,
-    IN _nit_editorial VARCHAR(20)
+    IN _nit_editorial VARCHAR(20),
+    IN _stock_actual INT,
+    IN _stock_minimo INT,
+    IN _activo BOOLEAN
 )
 BEGIN
-    INSERT INTO libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual) 
-    VALUES (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial, 50);
+    INSERT INTO libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo) 
+    VALUES (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial, IFNULL(_stock_actual, 50), IFNULL(_stock_minimo, 5), IFNULL(_activo, TRUE));
 END $$
 
 DROP PROCEDURE IF EXISTS sp_listarlibros $$
@@ -413,7 +416,10 @@ CREATE PROCEDURE sp_actualizarlibro(
     IN _fecha_publicacion DATE,
     IN _precio DECIMAL(10,2),
     IN _id_categoria INT,
-    IN _nit_editorial VARCHAR(20)
+    IN _nit_editorial VARCHAR(20),
+    IN _stock_actual INT,
+    IN _stock_minimo INT,
+    IN _activo BOOLEAN
 )
 BEGIN
     UPDATE libros 
@@ -421,7 +427,10 @@ BEGIN
         fecha_publicacion = _fecha_publicacion, 
         precio = _precio, 
         id_categoria = _id_categoria, 
-        nit_editorial = _nit_editorial 
+        nit_editorial = _nit_editorial,
+        stock_actual = IFNULL(_stock_actual, stock_actual),
+        stock_minimo = IFNULL(_stock_minimo, stock_minimo),
+        activo = IFNULL(_activo, activo)
     WHERE isbn = _isbn;
 END $$
 
