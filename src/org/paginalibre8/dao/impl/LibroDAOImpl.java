@@ -224,4 +224,19 @@ public class LibroDAOImpl implements LibroDAO {
             return false;
         }
     }
-}
+
+    @Override
+    public int getStockDisponible(String isbn) {
+        String sql = "SELECT stock_actual FROM libros WHERE isbn = ?";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             java.sql.PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setString(1, isbn);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("stock_actual");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener stock disponible: " + e.getMessage());
+        }
+        return 0;
+    }
+}

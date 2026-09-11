@@ -12,4 +12,5 @@ public interface LibroDAO {
     List<Libro> buscarPorAutor(String autor);
     boolean actualizar(Libro libro);
     boolean eliminar(String isbn);
+    int getStockDisponible(String isbn);
 }
