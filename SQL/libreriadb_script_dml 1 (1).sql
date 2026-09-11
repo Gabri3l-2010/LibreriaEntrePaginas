@@ -3,7 +3,7 @@ USE libreriadb_in4cm;
 -- =============================================================================
 -- 1. CATEGORÍAS INICIALES (1 al 40)
 -- =============================================================================
-INSERT INTO categorias (nombre_categoria) VALUES
+INSERT IGNORE INTO categorias (nombre_categoria) VALUES
 ('Ficción Cósmica'), ('Fantasía Épica'), ('Ciencia Ficción'), ('Novela Negra'), ('Misterio'),
 ('Biografía'), ('Historia Universal'), ('Poesía Contemporánea'), ('Romance'), ('Terror Psicológico'),
 ('Autoayuda'), ('Desarrollo Personal'), ('Filosofía'), ('Arte Moderno'), ('Religión y Espiritualidad'),
@@ -79,7 +79,7 @@ CALL sp_insertareditorial('1040-NN', 'Editorial Capitán Swing', '22445520', 'Zo
 -- =============================================================================
 -- 4. AUTORES INICIALES (1 al 40)
 -- =============================================================================
-INSERT INTO autores (nombre_autor, apellido_autor, nacionalidad, biografia) VALUES
+INSERT IGNORE INTO autores (nombre_autor, apellido_autor, nacionalidad, biografia) VALUES
 ('Gabriel', 'García Márquez', 'Colombiana', 'Premio Nobel de Literatura 1982. Exponente del realismo mágico.'),
 ('Julio', 'Cortázar', 'Argentina', 'Maestro del relato corto y creador de Rayuela.'),
 ('Isabel', 'Allende', 'Chilena', 'Autora de La Casa de los Espíritus. Gran exponente latinoamericana.'),
@@ -125,7 +125,7 @@ CALL sp_insertarautor('Mary', 'Shelley', 'Británica', 'Creadora de la icónica 
 -- =============================================================================
 -- 5. CLIENTES INICIALES
 -- =============================================================================
-INSERT INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) VALUES
+INSERT IGNORE INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) VALUES
 (2000100010101, 'Ana', 'López', 'ana.l@gmail.com'),
 (2000100020101, 'Carlos', 'Méndez', 'cmendez@yahoo.com'),
 (2000100030101, 'Luis', 'Pérez', 'lperez@hotmail.com'),
@@ -161,7 +161,7 @@ CALL sp_insertarcliente(2000100300101, 'Natalia', 'Sandoval', 'nsandoval@gmail.c
 -- =============================================================================
 -- 6. LIBROS INICIALES
 -- =============================================================================
-INSERT INTO libros (isbn, titulo, fecha_publicacion, precio, stock_actual, stock_minimo, id_categoria, nit_editorial) VALUES
+INSERT IGNORE INTO libros (isbn, titulo, fecha_publicacion, precio, stock_actual, stock_minimo, id_categoria, nit_editorial) VALUES
 ('978-0-123', 'Cien Años de Soledad', '1967-05-30', 150.00, 50, 5, 1, '1001-A'),
 ('978-0-124', 'Rayuela', '1963-06-28', 135.50, 40, 5, 1, '1002-B'),
 ('978-0-125', 'El Señor Presidente', '1946-01-01', 120.00, 30, 5, 1, '1019-S'),
@@ -189,7 +189,7 @@ CALL sp_insertarlibro('978-0-144', '1984', '1949-06-08', 145.00, 24, '1030-DD', 
 -- =============================================================================
 -- 7. AUTORES LIBRO (RELACIÓN AUTOR - LIBRO)
 -- =============================================================================
-INSERT INTO autores_libro (id_autor, isbn) VALUES
+INSERT IGNORE INTO autores_libro (id_autor, isbn) VALUES
 (1, '978-0-123'), (2, '978-0-124'), (5, '978-0-125'), (6, '978-0-126'), (8, '978-0-127'),  
 (13, '978-0-128'), (14, '978-0-129'), (16, '978-0-130'), (12, '978-0-131'), (10, '978-0-132'), 
 (3, '978-0-133'), (20, '978-0-134');
@@ -210,7 +210,7 @@ INSERT INTO ventas (fecha_venta, subtotal, total, cui_cliente, id_usuario, estad
 (NOW(), 95.00, 95.00, 2000100040101, (SELECT id_usuario FROM usuarios LIMIT 1), 'COMPLETADA'),
 (NOW(), 305.00, 305.00, 2000100050101, (SELECT id_usuario FROM usuarios LIMIT 1), 'COMPLETADA');
 
-INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES 
+INSERT IGNORE INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES 
 (1, '978-0-123', 1, 150.00, 150.00),
 (1, '978-0-126', 1, 180.00, 180.00),
 (2, '978-0-124', 1, 135.50, 135.50),
@@ -223,7 +223,7 @@ INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) 
 -- =============================================================================
 -- 9. MOVIMIENTOS DE INVENTARIO INICIALES
 -- =============================================================================
-INSERT INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES
+INSERT IGNORE INTO movimientos_inventario (isbn, tipo_movimiento, cantidad, id_usuario, observacion) VALUES
 ('978-0-123', 'VENTA', 1, (SELECT id_usuario FROM usuarios LIMIT 1), 'Venta inicial #1'),
 ('978-0-126', 'VENTA', 1, (SELECT id_usuario FROM usuarios LIMIT 1), 'Venta inicial #1'),
 ('978-0-124', 'VENTA', 1, (SELECT id_usuario FROM usuarios LIMIT 1), 'Venta inicial #2'),
