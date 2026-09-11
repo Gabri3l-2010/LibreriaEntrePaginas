@@ -4,27 +4,36 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane fx:id="rootPane" styleClass="mainFxmlClass" 
             stylesheets="@menuprincipaldashboardview.css" 
             xmlns="http://javafx.com/javafx/21" 
             xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="org.paginalibre8.controller.DashboardBodegaController">
-    <top>
-        <VBox alignment="CENTER" spacing="6">
-            <padding><Insets top="25" bottom="15"/></padding>
-            <Label styleClass="title-label" text="Librería Entre Páginas - Panel de Bodega" />
-            <Label fx:id="lblUsuario" text="Bodega" styleClass="subtitulo"/>
+            fx:controller="org.paginalibre8.controller.DashboardBodegaController"
+            prefWidth="1150.0" prefHeight="750.0">
+            
+    <!-- Botonera Lateral Izquierda (Panel Bodega) -->
+    <left>
+        <VBox spacing="12" alignment="TOP_CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 20 15 20 15;" prefWidth="220.0">
+            <Label text="Entre Páginas" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+            <Label fx:id="lblUsuario" text="Bodega" style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
+            
+            <VBox spacing="10" alignment="CENTER" VBox.vgrow="ALWAYS">
+                <Button fx:id="btnInventario" text="Gestión de Inventario" onAction="#handleInventario" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
+                <Button fx:id="btnCategorias" text="Categorías y Libros" onAction="#handleCategorias" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
+                <Button fx:id="btnCambiarPassword" text="Cambiar Contraseña" onAction="#handleCambiarPassword" prefWidth="190.0" prefHeight="42.0" styleClass="menu-button"/>
+            </VBox>
+            
+            <Button fx:id="btnSalir" text="Cerrar Sesión" onAction="#handleSalir" prefWidth="190.0" prefHeight="42.0" styleClass="exit-button"/>
         </VBox>
-    </top>
+    </left>
+    
+    <!-- Contenedor Central Dinámico (Lado Derecho) -->
     <center>
-        <VBox alignment="CENTER" spacing="15" styleClass="menu-container">
-            <padding><Insets bottom="30" left="40" right="40" top="10" /></padding>
-            <Button fx:id="btnInventario" onAction="#handleInventario" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Gestión de Inventario" />
-            <Button fx:id="btnCategorias" onAction="#handleCategorias" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Categorías y Libros" />
-            <Button fx:id="btnCambiarPassword" onAction="#handleCambiarPassword" prefHeight="45" prefWidth="240" styleClass="menu-button" text="Cambiar Contraseña" />
-            <Button fx:id="btnSalir" onAction="#handleSalir" prefHeight="45" prefWidth="240" styleClass="exit-button" text="Cerrar Sesión" />
-        </VBox>
+        <StackPane fx:id="contentArea" style="-fx-background-color: #ecf0f1;">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+        </StackPane>
     </center>
 </BorderPane>

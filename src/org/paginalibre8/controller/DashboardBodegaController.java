@@ -2,16 +2,15 @@ package org.paginalibre8.controller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import org.paginalibre8.model.Usuario;
 import org.paginalibre8.servicio.SesionUsuario;
 import org.paginalibre8.system.Main;
@@ -19,6 +18,8 @@ import org.paginalibre8.system.Main;
 public class DashboardBodegaController implements Initializable, DashboardController {
 
     @FXML private Label lblUsuario;
+    @FXML private StackPane contentArea;
+
     private Usuario usuarioActual;
 
     @Override
@@ -33,6 +34,7 @@ public class DashboardBodegaController implements Initializable, DashboardContro
                 lblUsuario.setText("Bodega: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
+        Platform.runLater(this::handleInventario);
     }
 
     @Override
@@ -41,57 +43,51 @@ public class DashboardBodegaController implements Initializable, DashboardContro
         if (lblUsuario != null && usuario != null) {
             lblUsuario.setText("Bodega: " + usuario.getUsername());
         }
+        Platform.runLater(this::handleInventario);
     }
 
     @FXML
-    private void handleInventario(ActionEvent event) {
+    private void handleInventario() {
         if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar el inventario.");
             return;
         }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/BuscadorLibrosView.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Buscador de Libros - Librería Entre Páginas");
-            stage.setScene(new Scene(root, 920, 640));
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al cargar el buscador de libros:\n" + e.getMessage());
-        }
+        cargarVista("/org/paginalibre8/view/style/BuscadorLibrosView.fxml");
     }
 
     @FXML
-    private void handleCategorias(ActionEvent event) {
+    private void handleCategorias() {
         if (!SesionUsuario.getInstancia().tienePermiso("GESTIONAR_INVENTARIO")) {
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar categorías.");
             return;
         }
-        mostrarInfo("Módulo de Categorías", "Abriendo categorías y clasificación de libros...");
+        cargarVista("/org/paginalibre8/view/style/BuscadorLibrosView.fxml");
     }
 
     @FXML
-    private void handleCambiarPassword(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre8/view/style/CambioPasswordView.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Cambio de Contraseña");
-            stage.setScene(new Scene(root, 420, 340));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.show();
-        } catch (Exception e) {
-            mostrarError("Error al abrir cambio de contraseña: " + e.getMessage());
-        }
+    private void handleCambiarPassword() {
+        cargarVista("/org/paginalibre8/view/style/CambioPasswordView.fxml");
     }
 
     @FXML
-    private void handleSalir(ActionEvent event) {
+    private void handleSalir() {
         SesionUsuario.getInstancia().cerrarSesion();
         try {
             Main.cambiarEscena("/org/paginalibre8/view/style/InicioSesionView.fxml");
         } catch (Exception e) {
             mostrarError("Error al cerrar sesión: " + e.getMessage());
+        }
+    }
+
+    private void cargarVista(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent vista = loader.load();
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(vista);
+            }
+        } catch (Exception e) {
+            mostrarError("Error al cargar la vista (" + fxmlPath + "):\n" + e.getMessage());
         }
     }
 
