@@ -55,6 +55,7 @@ CREATE TABLE clientes (
 );
 
 -- T3.4.1 (D1): Revisar la estructura actual de la tabla libros
+-- T3.4.2 (D1): Campos clave de inventario y estado: stock_actual, stock_minimo, activo
 CREATE TABLE libros (
     isbn VARCHAR(20) PRIMARY KEY,
     titulo VARCHAR(100) NOT NULL,
