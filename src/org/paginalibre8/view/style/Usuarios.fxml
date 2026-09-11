@@ -57,7 +57,8 @@
 
         <Button layoutX="170.0" layoutY="492.0" mnemonicParsing="false" onAction="#limpiarCampos" prefHeight="38.0" prefWidth="135.0" text="Limpiar" />
 
-        <Button layoutX="20.0" layoutY="550.0" mnemonicParsing="false" onAction="#verVentasDelDia" prefHeight="38.0" prefWidth="285.0" text="Ventas del día de hoy" />
+        <Label layoutX="20.0" layoutY="555.0" text="Total vendido hoy:" style="-fx-font-weight: bold; -fx-font-size: 13px;" />
+        <Label fx:id="lblTotalHoy" layoutX="20.0" layoutY="575.0" text="Q 0.00" style="-fx-font-size: 15px; -fx-text-fill: #27ae60; -fx-font-weight: bold;" />
 
         <!-- Tabla de Usuarios -->
 
