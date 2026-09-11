@@ -8,6 +8,7 @@ public class Libro {
     private String fechaPublicacion;
     private double precio;
     private int stock;
+    private int stockMinimo;
     private int idCategoria;
     private String categoriaNombre;
     private String nitEditorial;
@@ -15,25 +16,32 @@ public class Libro {
     private boolean activo;
 
     public Libro() {
+        this.stockMinimo = 5;
         this.activo = true;
     }
 
     public Libro(String isbn, String titulo, String autor, String fechaPublicacion,
-                 double precio, int stock, int idCategoria, String nitEditorial) {
+                 double precio, int stock, int stockMinimo, int idCategoria, String nitEditorial) {
         this.isbn = isbn;
         this.titulo = titulo;
         this.autor = autor;
         this.fechaPublicacion = fechaPublicacion;
         this.precio = precio;
         this.stock = stock;
+        this.stockMinimo = stockMinimo;
         this.idCategoria = idCategoria;
         this.nitEditorial = nitEditorial;
         this.activo = true;
     }
 
+    public Libro(String isbn, String titulo, String autor, String fechaPublicacion,
+                 double precio, int stock, int idCategoria, String nitEditorial) {
+        this(isbn, titulo, autor, fechaPublicacion, precio, stock, 5, idCategoria, nitEditorial);
+    }
+
     public Libro(String isbn, String titulo, String fechaPublicacion,
                  double precio, int idCategoria, String nitEditorial) {
-        this(isbn, titulo, "Desconocido", fechaPublicacion, precio, 0, idCategoria, nitEditorial);
+        this(isbn, titulo, "Desconocido", fechaPublicacion, precio, 0, 5, idCategoria, nitEditorial);
     }
 
     public String getIsbn() {
@@ -82,6 +90,14 @@ public class Libro {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public int getStockMinimo() {
+        return stockMinimo;
+    }
+
+    public void setStockMinimo(int stockMinimo) {
+        this.stockMinimo = stockMinimo;
     }
 
     public int getIdCategoria() {
