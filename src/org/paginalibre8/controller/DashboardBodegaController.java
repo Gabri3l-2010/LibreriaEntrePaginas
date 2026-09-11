@@ -34,7 +34,7 @@ public class DashboardBodegaController implements Initializable, DashboardContro
                 lblUsuario.setText("Bodega: " + SesionUsuario.getInstancia().getNombreCompleto());
             }
         }
-        Platform.runLater(this::handleInventario);
+        Platform.runLater(this::handleResumen);
     }
 
     @Override
@@ -43,7 +43,12 @@ public class DashboardBodegaController implements Initializable, DashboardContro
         if (lblUsuario != null && usuario != null) {
             lblUsuario.setText("Bodega: " + usuario.getUsername());
         }
-        Platform.runLater(this::handleInventario);
+        Platform.runLater(this::handleResumen);
+    }
+
+    @FXML
+    private void handleResumen() {
+        cargarVista("/org/paginalibre8/view/style/BodegaResumenView.fxml");
     }
 
     @FXML
