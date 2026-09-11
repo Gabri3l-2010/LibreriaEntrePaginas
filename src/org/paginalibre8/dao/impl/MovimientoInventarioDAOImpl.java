@@ -65,6 +65,11 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
 
     @Override
     public boolean registrarIngresoTransaccional(MovimientoInventario movimiento) {
+        if (movimiento == null || movimiento.getIsbn() == null
+                || movimiento.getIsbn().trim().isEmpty()
+                || movimiento.getCantidad() <= 0 || movimiento.getIdUsuario() <= 0) {
+            return false;
+        }
         Connection conexion = null;
         try {
             conexion = Conexion.getInstancia().conectar();

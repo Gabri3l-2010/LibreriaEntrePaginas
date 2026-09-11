@@ -2,6 +2,23 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/system/Main.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/db.properties</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/dao/impl/UsuarioDAO.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/nbproject/project.properties</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/CambioPasswordController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/UsuariosController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/InicioSesionController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/controller/DashboardController.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/servicio/Rol.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/util/Conexion.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/SQL/libreriadb_script_arreglado.sql</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/SQL/libreriadb_script_ddl%201%20(1).sql</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/SQL/libreriadb_script_dml%201%20(1).sql</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/dao/impl/UsuarioDAOImpl.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/dao/impl/MovimientoInventarioDAO.java</file>
+            <file>file:/C:/octavio%20letona/bim4/s4/LibreriaEntrePaginas/src/org/paginalibre8/model/MovimientoInventario.java</file>
+        </group>
     </open-files>
 </project-private>

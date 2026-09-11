@@ -52,7 +52,7 @@ public class DashboardBodegaController implements Initializable, DashboardContro
             mostrarAdvertencia("Acceso Denegado", "No cuentas con permiso para gestionar el inventario.");
             return;
         }
-        cargarVista("/org/paginalibre8/view/style/BuscadorLibrosView.fxml");
+        cargarVista("/org/paginalibre8/view/style/RegistrarIngresoInventarioView.fxml");
     }
 
     @FXML
